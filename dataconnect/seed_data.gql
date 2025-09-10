@@ -1,0 +1,126 @@
+mutation SeedDatabase @auth(level: USER) {
+  clientUser_insertMany(data: [
+    {
+      companyName: "Example Co",
+      createdAt: "2024-01-01T00:00:00Z",
+      displayName: "John Doe",
+      email: "john.doe@example.com",
+      hashedPassword: "hashed_password_1",
+      phoneNumber: "123-456-7890"
+    },
+    {
+      companyName: "Another Co",
+      createdAt: "2024-02-15T00:00:00Z",
+      displayName: "Jane Smith",
+      email: "jane.smith@another.com",
+      hashedPassword: "hashed_password_2",
+      phoneNumber: "987-654-3210"
+    }
+  ])
+  serviceUser_insertMany(data: [
+    {
+      createdAt: "2023-12-20T00:00:00Z",
+      displayName: "Alice Brown",
+      email: "alice.brown@service.com",
+      hashedPassword: "hashed_password_3",
+      role: "Admin"
+    },
+    {
+      createdAt: "2024-03-01T00:00:00Z",
+      displayName: "Bob Green",
+      email: "bob.green@service.com",
+      hashedPassword: "hashed_password_4",
+      role: "Support"
+    }
+  ])
+  project_insertMany(data: [
+    {
+      clientId: "550e8400-e29b-41d4-a716-446655440000",
+      assigneeId: "550e8400-e29b-41d4-a716-446655440001",
+      name: "Project Alpha",
+      description: "Initial project setup",
+      createdAt: "2024-01-10T00:00:00Z",
+      startDate: "2024-02-01T00:00:00Z",
+      endDate: "2024-06-30T00:00:00Z",
+      status: "Active",
+      budget: 50000.00
+    },
+    {
+      clientId: "550e8400-e29b-41d4-a716-446655440001",
+      assigneeId: "550e8400-e29b-41d4-a716-446655440000",
+      name: "Project Beta",
+      description: "Expanding client base",
+      createdAt: "2024-02-20T00:00:00Z",
+      startDate: "2024-03-15T00:00:00Z",
+      endDate: "2024-09-30T00:00:00Z",
+      status: "Planning",
+      budget: 75000.00
+    }
+  ])
+  invoice_insertMany(data: [
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440000",
+      clientId: "550e8400-e29b-41d4-a716-446655440000",
+      invoiceNumber: "INV-2024-001",
+      description: "Initial project invoice",
+      amount: 25000.00,
+      createdAt: "2024-02-01T00:00:00Z",
+      issueDate: "2024-02-01T00:00:00Z",
+      dueDate: "2024-03-01T00:00:00Z",
+      status: "Unpaid"
+    },
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440001",
+      clientId: "550e8400-e29b-41d4-a716-446655440001",
+      invoiceNumber: "INV-2024-002",
+      description: "Planning phase invoice",
+      amount: 37500.00,
+      createdAt: "2024-03-15T00:00:00Z",
+      issueDate: "2024-03-15T00:00:00Z",
+      dueDate: "2024-04-15T00:00:00Z",
+      status: "Unpaid"
+    }
+  ])
+  message_insertMany(data: [
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440000",
+      clientSenderId: "550e8400-e29b-41d4-a716-446655440000",
+      serviceSenderId: "550e8400-e29b-41d4-a716-446655440001",
+      senderType: "Client",
+      subject: "Project kickoff",
+      content: "Excited to start this project!",
+      sentAt: "2024-02-01T00:00:00Z"
+    },
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440001",
+      clientSenderId: "550e8400-e29b-41d4-a716-446655440001",
+      serviceSenderId: "550e8400-e29b-41d4-a716-446655440000",
+      senderType: "Service",
+      subject: "Planning meeting",
+      content: "Let's schedule a planning meeting.",
+      sentAt: "2024-03-15T00:00:00Z"
+    }
+  ])
+  file_insertMany(data: [
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440000",
+      clientUploaderId: "550e8400-e29b-41d4-a716-446655440000",
+      filename: "alpha_contract.pdf",
+      fileUrl: "https://example.com/alpha_contract.pdf",
+      mimeType: "application/pdf",
+      description: "Project Alpha contract",
+      uploaderType: "Client",
+      uploadedAt: "2024-01-15T00:00:00Z"
+    },
+    {
+      projectId: "550e8400-e29b-41d4-a716-446655440001",
+      serviceUploaderId: "550e8400-e29b-41d4-a716-446655440000",
+      filename: "beta_plan.docx",
+      fileUrl: "https://example.com/beta_plan.docx",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      description: "Project Beta planning document",
+      uploaderType: "Service",
+      uploadedAt: "2024-02-25T00:00:00Z"
+    }
+  ])
+}

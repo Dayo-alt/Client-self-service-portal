@@ -1,0 +1,33 @@
+mutation CreateProject @auth(level: USER) {
+  project_insert(data: {
+    name: "New Project",
+    description: "A new project description",
+    clientId: "123e4567-e89b-12d3-a456-426614174000",
+    startDate: "2024-01-01T00:00:00Z",
+    status: "Active"
+  })
+}
+
+query ListActiveProjects @auth(level: USER) {
+  projects(where: {status: {eq: "Active"}}) {
+    id
+    name
+    description
+    startDate
+    endDate
+    status
+  }
+}
+
+mutation UpdateInvoiceStatus($id: UUID!, $status: String!) @auth(level: USER) {
+  invoice_update(key: {id: $id}, data: {status: $status})
+}
+
+query ListClientInvoices($clientId: UUID!) @auth(level: USER) {
+  invoices(where: {clientId: {eq: $clientId}}) {
+    id
+    amount
+    dueDate
+    status
+  }
+}

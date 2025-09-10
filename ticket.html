@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tickets.</title>
+  <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+   <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+        <script type="text/javascript" src="invoice.js" defer></script>
+    <!-- jsPDF core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- jsPDF AutoTable plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <!-- shared nav + sidebar -->
+  <div class="navbar">
+  <div class="left">
+    <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+  </div>
+
+  <div class="center links">
+    <a href="invoice.html">Home</a>
+    <a href="#">Contact Us</a>
+  </div>
+
+  <div class="right profile-icon">
+    <a href="profile.html">
+      <span class="material-symbols-outlined">account_circle</span>
+    </a>
+  </div>
+</div>
+
+
+  <div class="sidebar" id="sidebar">
+    <div class="menu">
+      <a class="red" href="invoice.html">Invoice</a>
+      <a class="purple" href="ticket.html">Ticket</a>
+      <a class="green" href="settings.html">Settings</a>
+    </div>
+    <div class="logout" onclick="logout()">Log Out</div>
+  </div>
+
+  <!-- content -->
+  <div class="content">
+    <div class="page" style="background:#e74d3c00;">
+<style>
+:root {
+  --bg: #f9f9fb;          /* soft light background */
+  --card: #ffffff;        /* pure white cards */
+  --muted: #6b7280;       /* neutral grey text */
+  --white: #111111;       /* primary text (dark) */
+  --accent: #3b82f6;      /* blue accent */
+  --accent-2: #2563eb;    /* darker blue for gradients */
+  --glass: rgba(0,0,0,0.03);
+  --success: #22c55e;
+  --danger: #ef4444;
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: linear-gradient(180deg,#f0f4f9 0%, #ffffff 100%);
+  color: var(--white);
+}
+
+  .app{
+    max-width:1200px; margin:28px auto; padding:20px; display:grid; grid-template-columns:320px 1fr; gap:26px;
+  }
+
+  /* left column: form */
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px; padding:18px; box-shadow: var(--shadow); border:1px solid rgba(255,255,255,0.03);
+  }
+  .title {
+    font-size:13px; text-transform:uppercase; color:var(--accent);
+    letter-spacing:1px; font-weight:600; margin-bottom:10px;
+  }
+  label{display:block; font-size:13px; color:var(--muted); margin-top:14px; margin-bottom:6px;}
+  input[type="text"], textarea, select {
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
+    background:rgba(255,255,255,0.02); color:var(--white); outline:none; font-size:14px;
+  }
+  #subject {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--white);
+  outline: none;
+  font-size: 14px;
+  resize: none; /* prevents odd resizing handles */
+  margin-bottom: 15px; /* space below */
+}
+#category {
+  /* Box model styling for the select box itself */
+  width: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #464f46;
+  /* Font and color styling for the selected text */
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: #a6a6a6;
+}
+
+/* Style for the options within the dropdown */
+#category option {
+  /* This has very limited support and may not work consistently */
+  background-color: #fff;
+  color: #000;
+  font-family: Arial, sans-serif;
+  padding: 5px; /* This padding will often be ignored */
+}
+
+/* Pseudo-class to style the select when it is focused */
+#category:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* To remove the default browser arrow (in some browsers) */
+#category {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23333"><path d="M7.646 10.646l-4-4a.5.5 0 01.708-.708L8 9.293l3.646-3.647a.5.5 0 01.708.708l-4 4a.5.5 0 01-.708 0z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+  textarea{min-height:120px; resize:vertical;}
+  .file-row{display:flex; gap:8px; align-items:center;}
+  .btn{
+    display:inline-block; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px;
+    border: none;
+    background:linear-gradient(180deg,var(--accent),var(--accent-2));
+    color:var(--bg);
+    margin-top:14px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+  }
+  .btn.ghost{
+    background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,0.04);
+  }
+
+  /* right column layout */
+  .right{
+    display:flex; flex-direction:column; gap:18px;
+  }
+
+  /* status tracker card (top right green) */
+  .status-card{
+    background:linear-gradient(180deg, rgba(138,169,153,0.12), rgba(138,169,153,0.06));
+    border-radius:14px; padding:18px; border:1px solid rgba(138,169,153,0.12);
+  }
+  .steps{
+    display:flex; align-items:center; gap:18px; justify-content:space-between;
+  }
+  .step{
+    display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; min-width:0;
+  }
+  .dot{
+    width:40px; height:40px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.03); color:var(--muted); font-weight:700; border:2px solid rgba(255,255,255,0.03);
+    transition:all 300ms ease;
+  }
+  .dot.active{
+    background:var(--white); color:var(--bg); transform:scale(1.06); border-color:rgba(0,0,0,0.06);
+  }
+  .dot.done{
+    background:var(--accent); color:var(--bg); transform:scale(1.06);
+  }
+  .step-label{font-size:13px; text-align:center; color:var(--white);}
+  .progress-line{
+    height:6px; background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border-radius:6px; margin-top:14px; overflow:hidden;
+  }
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0%; transition:width 500ms ease; }
+
+  /* Chat & history card (orange in your sketch => use neutral card) */
+  .chat-card{
+    background:var(--card); border-radius:14px; padding:18px; border:1px solid rgba(255,255,255,0.03);
+    display:grid; grid-template-columns: 1fr 300px; gap:18px; min-height:320px;
+  }
+  .chat-main{ display:flex; flex-direction:column; gap:12px; }
+  .messages{ flex:1; overflow:auto; padding:8px; border-radius:10px; background:rgba(255,255,255,0.015); }
+  .msg{ padding:10px 12px; border-radius:10px; margin-bottom:8px; max-width:80%; font-size:14px;}
+  .msg.user{ background:rgba(255,255,255,0.03); align-self:flex-end; color:var(--white);}
+  .msg.bot{ background:rgba(255,255,255,0.02); color:var(--muted);}
+  .chat-input{ display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .chat-input input{ flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:transparent; color:var(--white); }
+  .history{
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015));
+    border-radius:10px; padding:12px; overflow:auto; max-height:360px;
+  }
+  .ticket-item{ padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; border:1px solid rgba(255,255,255,0.02);}
+  .ticket-item:hover{ background:rgba(255,255,255,0.02);}
+  .meta{ font-size:12px; color:var(--muted); margin-top:6px;}
+
+  /* floating notification top-right */
+  /* .toast-wrap{ position:fixed; top:18px; right:18px; display:flex; flex-direction:column; gap:10px; z-index:9999; }
+  .toast{ padding:12px 14px; border-radius:10px; background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); color:var(--white); box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.03); min-width:240px; font-weight:600; }
+  .toast small{ display:block; font-weight:400; color:var(--muted); font-size:12px; margin-top:6px; } */
+  .toast {
+  padding:12px 14px;
+  border-radius:10px;
+  background:#d3d3d3; /* light grey */
+  color:#111;          /* dark text */
+  box-shadow:var(--shadow);
+  border:1px solid rgba(0,0,0,0.08);
+  min-width:240px;
+  font-weight:600;
+}
+.toast small {
+  display:block;
+  font-weight:400;
+  color:#333;
+  font-size:12px;
+  margin-top:6px;
+}
+.toast-wrap {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+
+input[type="file"] {
+  display:none;
+}
+.file-label {
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  color:var(--bg);
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 6px 12px rgba(0,0,0,0.45);
+}
+.file-label:hover {
+  opacity:0.9;
+}
+
+
+
+  /* responsive */
+  @media (max-width:900px){
+    .app{ grid-template-columns: 1fr; padding:12px; }
+    .chat-card{ grid-template-columns: 1fr; }
+  }
+
+  footer.note{ text-align:center; margin-top:18px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Left: Form -->
+  <aside class="panel">
+    <div class="title">Ticket Submission</div>
+    <div style="font-size:14px; color:var(--muted);">Raise a new support request — we'll track it and notify you.</div>
+
+    <label for="subject">Subject</label>
+    <input id="subject" placeholder="Short summary (e.g., Can't login)">
+
+    <label for="category">Category</label>
+    <select id="category">
+      <option>Technical Issue</option>
+      <option>Billing</option>
+      <option>Onboarding</option>
+      <option>Feature Request</option>
+      <option>Other</option>
+    </select>
+
+    <label for="desc">Description</label>
+    <textarea id="desc" placeholder="Explain the problem with steps to reproduce (optional)"></textarea>
+
+   <label>Attach file</label>
+<div class="file-row">
+  <label for="file" class="file-label">Choose File</label>
+  <input id="file" type="file" accept=".png,.jpg,.jpeg,.pdf,.txt,.log">
+  <button id="attachRemove" class="btn ghost" style="padding:8px 10px;">Remove</button>
+</div>
+
+
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button class="btn" id="submitTicket">Submit Ticket</button>
+      <button id="startDemo" class="btn ghost">Start Auto Demo</button>
+    </div>
+
+    <div style="margin-top:16px; font-size:13px; color:var(--muted);">
+      <strong>Quick controls:</strong> Submit to create a ticket; click any ticket in History to view it on the right.
+    </div>
+  </aside>
+
+  <!-- Right: status + chat/history -->
+  <section class="right">
+    <div class="status-card panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:15px;">Status Tracker</div>
+        <div style="font-size:13px; color:var(--muted);">Auto-advance every 5s</div>
+      </div>
+
+      <div class="steps" id="stepsRow">
+        <!-- steps are generated via JS -->
+      </div>
+
+      <div class="progress-line" aria-hidden>
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="chat-card panel">
+      <div class="chat-main">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:700;">Conversation Thread</div>
+          <div style="font-size:12px; color:var(--muted);">Clients & support team chat in one place</div>
+        </div>
+
+        <div class="messages" id="messages">
+          <div style="color:var(--muted); font-size:13px; padding:10px; text-align:center;">Load a ticket from History or submit a new one.</div>
+        </div>
+
+        <div class="chat-input">
+          <input id="chatInput" placeholder="Type a message to the bot..." autocomplete="off">
+          <button id="sendMsg" class="btn ghost">Send</button>
+        </div>
+      </div>
+
+      <aside style="display:flex; flex-direction:column;">
+        <div style="font-weight:700; margin-bottom:8px;">Ticket History</div>
+        <div class="history" id="historyList">
+          <div style="color:var(--muted); font-size:13px;">No tickets yet — submit one on the left.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="panel note" style="background:transparent; box-shadow:none; border:none;">
+      Tip: click a ticket in History to focus it. You can also remove attachments after selecting.
+    </footer>
+  </section>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+(function(){
+  // Data structures
+  let tickets = []; // {id, subject, desc, category, fileName, statusIndex, messages: [{from,msg,ts}], autoTimers: []}
+  const statuses = ["Open","In Progress","Awaiting Client Response","Resolved"];
+  const AUTO_ADVANCE_MS = 3000; // 3s per spec
+  const RESOLVE_DELAY_MS = 5000; // 5s for chat resolution
+
+  // DOM
+  const stepsRow = document.getElementById('stepsRow');
+  const progressFill = document.getElementById('progressFill');
+  const historyList = document.getElementById('historyList');
+  const messagesBox = document.getElementById('messages');
+  const toasts = document.getElementById('toasts');
+
+  // Build status step UI
+  function renderSteps(activeIndex=0){
+    stepsRow.innerHTML = '';
+    statuses.forEach((s,i)=>{
+      const step = document.createElement('div');
+      step.className='step';
+      step.innerHTML = `<div class="dot ${i<activeIndex?'done': (i===activeIndex?'active':'')}">${i+1}</div><div class="step-label">${s}</div>`;
+      stepsRow.appendChild(step);
+    });
+    const fillPercent = (activeIndex/(statuses.length-1))*100;
+    progressFill.style.width = fillPercent+'%';
+  }
+  renderSteps(0);
+
+  // Utility: toast notification
+  function showToast(title,desc,ttl=4500){
+    const t = document.createElement('div');
+    t.className='toast';
+    t.innerHTML = `<div>${title}</div><small>${desc||''}</small>`;
+    toasts.appendChild(t);
+    setTimeout(()=> t.style.opacity = '0.01', ttl - 400);
+    setTimeout(()=> t.remove(), ttl);
+  }
+
+  // Save to history UI
+  function refreshHistory(){
+    historyList.innerHTML = '';
+    if(tickets.length===0){
+      historyList.innerHTML = '<div style="color:var(--muted); font-size:13px;">No tickets yet — submit one on the left.</div>';
+      return;
+    }
+    tickets.slice().reverse().forEach(t=>{
+      const el = document.createElement('div');
+      el.className = 'ticket-item';
+      el.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:700;">${escapeHtml(t.subject || '(No subject)')}</div>
+          <div style="font-size:12px; color:${statusColor(t.statusIndex)}; font-weight:700;">${statuses[t.statusIndex]}</div>
+        </div>
+        <div class="meta">${escapeHtml(t.category)} • ${t.fileName?('Attachment: '+escapeHtml(t.fileName)):''}</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:6px;">${escapeHtml(truncate(t.desc,90))}</div>
+      `;
+      el.onclick = ()=> selectTicket(t.id);
+      historyList.appendChild(el);
+    });
+  }
+
+  // ticket selection
+  let currentTicketId = null;
+  function selectTicket(id){
+    currentTicketId = id;
+    const t = tickets.find(x=>x.id===id);
+    if(!t) return;
+    renderSteps(t.statusIndex);
+    renderMessages(t);
+  }
+
+  // messages rendering
+  function renderMessages(ticket){
+    messagesBox.innerHTML = '';
+    if(ticket.messages.length===0){
+      messagesBox.innerHTML = `<div style="color:var(--muted); padding:12px;">No conversation yet — say hi.</div>`;
+      return;
+    }
+    ticket.messages.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = 'msg ' + (m.from==='user'?'user':'bot');
+      div.textContent = m.msg;
+      messagesBox.appendChild(div);
+    });
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  }
+
+  // status color helper
+  function statusColor(idx){
+    if(idx===0) return '#7fb77f';
+    if(idx===1) return '#ffd36e';
+    if(idx===2) return '#e08b6c';
+    return '#8aa999';
+  }
+
+  // escape helper
+  function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>"']/g, (c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function truncate(s,n){ if(!s) return ''; return s.length>n? s.slice(0,n-1)+'…':s; }
+
+  // Submit ticket
+  document.getElementById('submitTicket').addEventListener('click',()=>{
+    const sub = document.getElementById('subject').value.trim();
+    const cat = document.getElementById('category').value;
+    const desc = document.getElementById('desc').value.trim();
+    const fileIn = document.getElementById('file');
+    const fileName = fileIn.files && fileIn.files.length? fileIn.files[0].name : '';
+
+    const id = Date.now().toString(36);
+    const ticket = { id, subject: sub || '(No subject)', category: cat, desc, fileName, statusIndex:0, messages: [], autoTimers: [] };
+    tickets.push(ticket);
+    refreshHistory();
+    selectTicket(id);
+    showToast('Ticket submitted', `Subject: ${truncate(ticket.subject,40)}`, 4000);
+
+    // Add initial bot message
+    ticket.messages.push({from:'bot', msg:'Thank you Sir/Ma — your ticket is received. We will start processing it shortly.', ts:Date.now()});
+    renderMessages(ticket);
+
+    // start auto status advance for this ticket
+    scheduleAutoAdvance(ticket);
+  });
+
+  // attach remove
+  document.getElementById('attachRemove').addEventListener('click',()=>{
+    const fileIn = document.getElementById('file');
+    fileIn.value = null;
+    showToast('Attachment removed','No file attached',2000);
+  });
+
+  // schedule auto status advance for a ticket
+  function scheduleAutoAdvance(ticket){
+    // clear any existing timers
+    ticket.autoTimers.forEach(t=>clearTimeout(t));
+    ticket.autoTimers = [];
+
+    for(let i=1;i<statuses.length;i++){
+      const delay = i * AUTO_ADVANCE_MS; // 5s intervals
+      const timer = setTimeout(()=>{
+        ticket.statusIndex = i;
+        // when a ticket's status updates, show toast and update UI if it's selected
+        showToast('Status update', `Ticket "${truncate(ticket.subject, 26)}" is now "${statuses[i]}"`, 4200);
+        refreshHistory();
+        if(currentTicketId === ticket.id){
+          renderSteps(ticket.statusIndex);
+        }
+        // When moving to next, append a system message in conversation
+        ticket.messages.push({from:'bot', msg:`Status changed to: ${statuses[i]}`, ts:Date.now()});
+        if(currentTicketId===ticket.id) renderMessages(ticket);
+      }, delay);
+      ticket.autoTimers.push(timer);
+    }
+  }
+
+  // start demo button: create a sample ticket and begin
+  document.getElementById('startDemo').addEventListener('click',()=>{
+    document.getElementById('subject').value = 'Demo: App crash on launch';
+    document.getElementById('desc').value = 'When I open the app it immediately crashes with code 0x0.';
+    document.getElementById('category').value = 'Technical Issue';
+    document.getElementById('file').value = null;
+    document.getElementById('submitTicket').click();
+  });
+
+  // Chat controls
+  document.getElementById('sendMsg').addEventListener('click', sendChat);
+  document.getElementById('chatInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendChat(); });
+
+  function sendChat(){
+    const txt = document.getElementById('chatInput').value.trim();
+    if(!txt || !currentTicketId) {
+      if(!currentTicketId) showToast('No ticket selected','Click a ticket from History or submit a new one',3000);
+      return;
+    }
+    const ticket = tickets.find(t=>t.id===currentTicketId);
+    if(!ticket) return;
+    ticket.messages.push({from:'user', msg: txt, ts:Date.now()});
+    renderMessages(ticket);
+    document.getElementById('chatInput').value = '';
+
+    // Bot logic rules per spec
+    const lower = txt.toLowerCase();
+
+    if(lower.includes('good morning') || lower.includes('good afternoon') || lower.includes('good evening')){
+      ticket.messages.push({from:'bot', msg: `Good Day sir/ma, how may I help you?`, ts:Date.now()});
+      renderMessages(ticket);
+      return;
+    }
+
+    // For "problem description", respond and trigger resolve flow
+    ticket.messages.push({from:'bot', msg: `We are working on it — we'll get back to you soon.`, ts:Date.now()});
+    renderMessages(ticket);
+
+    // After 30s, send "resolved" message
+    const resolveTimer = setTimeout(()=>{
+      ticket.messages.push({from:'bot', msg: `It has been resolved — enjoy :)`, ts:Date.now()});
+      // Also set status to Resolved if not already
+      ticket.statusIndex = statuses.length - 1;
+      showToast('Ticket resolved', `Ticket "${truncate(ticket.subject,28)}" marked resolved`, 4500);
+      refreshHistory();
+      if(currentTicketId === ticket.id){
+        renderSteps(ticket.statusIndex);
+        renderMessages(ticket);
+      }
+    }, RESOLVE_DELAY_MS);
+    ticket.autoTimers.push(resolveTimer);
+  }
+
+  // helper: when a ticket is selected or status changes, maintain UI
+  // Already done in selectTicket and scheduleAutoAdvance
+
+  // small UX: auto-select last added ticket
+  // Already handled by selectTicket after submit
+
+  // initial render
+  refreshHistory();
+
+  // expose for debugging on window (optional)
+  window._tickets = tickets;
+
+  // small safety: clean up timers when leaving page (not necessary but tidy)
+  window.addEventListener('beforeunload', ()=> {
+    tickets.forEach(t=> t.autoTimers && t.autoTimers.forEach(x=>clearTimeout(x)));
+  });
+
+})();
+</script>
+</body>
+</html>
+
+    </div>
+  </div>
+
+  <!-- <div class="navbar">
+  <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+  <div class="links">
+    <a href="#">Link1</a>
+    <a href="#">Link2</a>
+    <a href="#">Link3</a>
+  </div>
+</div> -->
+
+<!-- <div class="sidebar" id="sidebar">
+  <div class="menu">
+    <a class="red" href="invoice.html">1st Page</a>
+    <a class="purple" href="ticket.html">2nd Page</a>
+    <a class="green" href="settings.html">3rd Page</a>
+  </div>
+  <div class="logout" onclick="logout()">Log Out</div>
+</div> -->
+
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("closed");
+    document.querySelector(".content").classList.toggle("full");
+  }
+  function logout() {
+    window.location.href = "login.html";
+  }
+</script>
+
+
+  <!-- <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("closed");
+      document.querySelector(".content").classList.toggle("full");
+    }
+    function logout() {
+      window.location.href = "login.html";
+    }
+  </script> -->
+</body>
+</html>

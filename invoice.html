@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice</title>
+  <link rel="stylesheet" href="layout.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+   <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+        <script type="text/javascript" src="invoice.js" defer></script>
+    <!-- jsPDF core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- jsPDF AutoTable plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <!-- shared nav + sidebar -->
+<div class="navbar">
+  <div class="left">
+    <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+  </div>
+
+  <div class="center links">
+    <a href="invoice.html">Home</a>
+    <a href="#">Contact Us</a>
+  </div>
+
+  <div class="right profile-icon">
+    <a href="profile.html">
+      <span class="material-symbols-outlined">account_circle</span>
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="menu">
+      <a class="red" href="invoice.html">Invoice</a>
+      <a class="purple" href="ticket.html">Ticket</a>
+      <a class="green" href="settings.html">Settings</a>
+    </div>
+    <div class="logout" onclick="logout()">Log Out</div>
+  </div>
+
+  <!-- content -->
+  <div class="content">
+    <div class="pag" >
+
+    <div class="invoice-dashboard">
+  <h2>Invoice Dashboard</h2>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input type="text" id="searchInvoice" placeholder="Search by Invoice ID">
+    <input type="date" id="startDate"> 
+    <input type="date" id="endDate">
+    <select id="statusFilter">
+      <option value="">All Status</option>
+      <option value="Paid">Paid</option>
+      <option value="Pending">Pending</option>
+      <option value="Overdue">Overdue</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <table id="invoiceTable" border="1">
+    <thead>
+      <tr class="tr">
+        <th>Invoice #</th>
+        <th>Date</th>
+        <th>Service</th>
+        <th>Amount</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dummy Data Example -->
+      <tr>
+        <td>INV001</td>
+        <td>2025-08-01</td>
+        <td>Web Hosting</td>
+        <td>$50</td>
+        <td>Paid</td>
+      </tr>
+      <tr>
+        <td>INV002</td>
+        <td>2025-08-10</td>
+        <td>Domain Renewal</td>
+        <td>$15</td>
+        <td>Pending</td>
+      </tr>
+      <tr>
+        <td>INV003</td>
+        <td>2025-08-15</td>
+        <td>SEO Services</td>
+        <td>$200</td>
+        <td>Overdue</td>
+      </tr>
+      <tr>
+        <td>INV004</td>
+        <td>2025-08-20</td>
+        <td>Front-end-DEV</td>
+        <td>$30</td>
+        <td>Paid</td>
+      </tr>
+      <tr>
+        <td>INV005</td>
+        <td>2025-08-25</td>
+        <td>Back-end-Dev</td>
+        <td>$800</td>
+        <td>Overdue</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Download Buttons -->
+  <div class="downloads">
+  <button onclick="downloadSelectedPDF()">Download Selected PDF</button>
+  <button onclick="downloadAllPDF()">Download All PDF</button>
+  <button onclick="downloadCSV()">Download CSV</button>
+</div>
+
+<script>
+
+  let selectedRow = null;
+
+// Row click selection
+document.querySelectorAll("#invoiceTable tbody tr").forEach(row => {
+  row.addEventListener("click", () => {
+    // Remove previous selection
+    if (selectedRow) {
+      selectedRow.classList.remove("selected");
+    }
+    // Set new selection
+    selectedRow = row;
+    row.classList.add("selected");
+  });
+});
+
+// Export selected row as PDF
+function downloadPDF() {
+  if (!selectedRow) {
+    alert("Please select an invoice row first.");
+    return;
+  }
+
+  const invoiceData = {
+    id: selectedRow.cells[0].innerText,
+    date: selectedRow.cells[1].innerText,
+    service: selectedRow.cells[2].innerText,
+    amount: selectedRow.cells[3].innerText,
+    status: selectedRow.cells[4].innerText
+  };
+
+  const doc = new jspdf.jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Invoice", 90, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Invoice Number: ${invoiceData.id}`, 20, 40);
+  doc.text(`Date: ${invoiceData.date}`, 20, 50);
+  doc.text(`Service: ${invoiceData.service}`, 20, 60);
+  doc.text(`Amount: ${invoiceData.amount}`, 20, 70);
+  doc.text(`Status: ${invoiceData.status}`, 20, 80);
+
+  doc.setFontSize(10);
+  doc.text("Thank you for your business!", 20, 100);
+
+  doc.save(`${invoiceData.id}.pdf`);
+}
+
+    // Dummy Data (for now could replace with DB/API)
+const invoices = [
+  { id: "INV001", date: "2025-08-01", service: "Web Hosting", amount: 50, status: "Paid" },
+  { id: "INV002", date: "2025-08-10", service: "Domain Renewal", amount: 15, status: "Pending" },
+  { id: "INV003", date: "2025-08-15", service: "SEO Services", amount: 200, status: "Overdue" },
+  { id: "INV004", date: "2025-08-20", service: "Front-end-Dev", amount: 30, status: "paid" },
+  { id: "INV005", date: "2025-08-25", service: "Back-end-Dev", amount: 800, status: "Overdue" }
+];
+
+// Filter + Search Logic
+document.getElementById("searchInvoice").addEventListener("input", filterTable);
+document.getElementById("statusFilter").addEventListener("change", filterTable);
+
+function filterTable() {
+  const searchVal = document.getElementById("searchInvoice").value.toLowerCase();
+  const statusVal = document.getElementById("statusFilter").value;
+
+  const rows = document.querySelectorAll("#invoiceTable tbody tr");
+  rows.forEach(row => {
+    const id = row.cells[0].innerText.toLowerCase();
+    const status = row.cells[4].innerText;
+    const matchSearch = id.includes(searchVal);
+    const matchStatus = statusVal === "" || status === statusVal;
+    row.style.display = matchSearch && matchStatus ? "" : "none";
+  });
+}
+
+// Export PDF (using jsPDF)
+function downloadPDF() {
+  const doc = new jspdf.jsPDF();
+  doc.text("Invoice List", 10, 10);
+  doc.autoTable({ html: "#invoiceTable" });
+  doc.save("invoices.pdf");
+}
+
+// Export CSV
+function downloadCSV() {
+  let csv = [];
+  const rows = document.querySelectorAll("#invoiceTable tr");
+  rows.forEach(row => {
+    const cols = row.querySelectorAll("td, th");
+    const data = [...cols].map(col => col.innerText).join(",");
+    csv.push(data);
+  });
+  const csvBlob = new Blob([csv.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(csvBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "invoices.csv";
+  a.click();
+}
+
+// Export selected row as PDF
+function downloadSelectedPDF() {
+  if (!selectedRow) {
+    alert("Please select an invoice row first.");
+    return;
+  }
+
+  const invoiceData = {
+    id: selectedRow.cells[0].innerText,
+    date: selectedRow.cells[1].innerText,
+    service: selectedRow.cells[2].innerText,
+    amount: selectedRow.cells[3].innerText,
+    status: selectedRow.cells[4].innerText
+  };
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Invoice", 90, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Invoice Number: ${invoiceData.id}`, 20, 40);
+  doc.text(`Date: ${invoiceData.date}`, 20, 50);
+  doc.text(`Service: ${invoiceData.service}`, 20, 60);
+  doc.text(`Amount: ${invoiceData.amount}`, 20, 70);
+  doc.text(`Status: ${invoiceData.status}`, 20, 80);
+
+  doc.setFontSize(10);
+  doc.text("Thank you for your business!", 20, 100);
+
+  doc.save(`${invoiceData.id}.pdf`);
+}
+
+// Export full table as PDF
+function downloadAllPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Invoice List", 10, 10);
+  doc.autoTable({ html: "#invoiceTable" });
+  doc.save("invoices.pdf");
+}
+
+</script>
+
+<style>
+  /* General Container */
+/* General Container */
+.invoice-dashboard {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: #f8fdf9; /* soft light greenish background */
+  color: #2d3a32; /* deep grey-green text */
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  font-family: "Poppins", "Segoe UI", Tahoma, sans-serif;
+}
+/* Heading */
+.invoice-dashboard h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 26px;
+  font-weight: 600;
+  color: #2f5d4e; /* darker green */
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.filters input, 
+.filters select {
+  padding: 10px 12px;
+  border: 1px solid #c8d5cd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  transition: 0.3s;
+  color: #2d3a32;
+}
+
+.filters input:focus, 
+.filters select:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 6px rgba(76,175,80,0.3);
+}
+
+/* Table */
+#invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 15px;
+  background: white;
+}
+
+#invoiceTable thead {
+  background: #566c5b;
+  color: #141514;
+  text-align: left;
+}
+
+#invoiceTable th, 
+#invoiceTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #dfe8e2;
+}
+
+#invoiceTable tbody tr:hover {
+  background: #f3f8f5;
+  cursor: pointer;
+}
+
+/* Status Colors */
+#invoiceTable td:nth-child(5) {
+  font-weight: bold;
+}
+#invoiceTable td:nth-child(5):contains("Paid") {
+  color: #2e7d32;
+}
+#invoiceTable td:nth-child(5):contains("Pending") {
+  color: #ef6c00;
+}
+#invoiceTable td:nth-child(5):contains("Overdue") {
+  color: #c62828;
+}
+
+/* Download Buttons */
+.downloads {
+  margin-top: 20px;
+  text-align: center;
+}
+.downloads button {
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  margin: 0 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
+}
+.downloads button:hover {
+  background: #388e3c;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Highlight selected row */
+#invoiceTable tbody tr.selected {
+  background: #dbe9e1 !important;
+}
+
+/* Inputs grey-green look */
+#searchInvoice,
+#startDate,
+#endDate,
+#statusFilter {
+  border: 1px solid #c8d5cd;
+  background: #ffffff;
+  color: #2d3a32;
+  outline: none;
+}
+
+</style>
+
+    </div>
+  </div>
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("closed");
+    document.querySelector(".content").classList.toggle("full");
+  }
+  function logout() {
+    window.location.href = "login.html";
+  }
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+    authDomain: "client-self-service-portal.firebaseapp.com",
+    projectId: "client-self-service-portal",
+    storageBucket: "client-self-service-portal.firebasestorage.app",
+    messagingSenderId: "423657022971",
+    appId: "1:423657022971:web:d58cd5730591b0e121175e",
+    measurementId: "G-EDW6QM7B76"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAuth(app);
+
+   window.firebaseAuth = auth;
+  window.firebaseFns = { createUserWithEmailAndPassword, signInWithEmailAndPassword };
+</script>
+</body>
+</html>

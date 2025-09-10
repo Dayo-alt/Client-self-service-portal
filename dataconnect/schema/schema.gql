@@ -1,0 +1,63 @@
+type ClientUser @table {
+  email: String!
+  hashedPassword: String!
+  displayName: String!
+  createdAt: Timestamp!
+  phoneNumber: String
+  companyName: String
+}
+
+type ServiceUser @table {
+  email: String!
+  hashedPassword: String!
+  displayName: String!
+  createdAt: Timestamp!
+  role: String
+}
+
+type Project @table {
+  name: String!
+  startDate: Timestamp!
+  status: String!
+  createdAt: Timestamp!
+  description: String
+  endDate: Timestamp
+  budget: Float
+  client: ClientUser
+  assignee: ServiceUser
+}
+
+type Invoice @table {
+  invoiceNumber: String!
+  amount: Float!
+  issueDate: Timestamp!
+  dueDate: Timestamp!
+  status: String!
+  createdAt: Timestamp!
+  description: String
+  paymentDate: Timestamp
+  client: ClientUser
+  project: Project
+}
+
+type File @table {
+  filename: String!
+  fileUrl: String!
+  uploadedAt: Timestamp!
+  uploaderType: String!
+  description: String
+  mimeType: String
+  project: Project
+  clientUploader: ClientUser
+  serviceUploader: ServiceUser
+}
+
+type Message @table {
+  content: String!
+  sentAt: Timestamp!
+  senderType: String!
+  subject: String
+  project: Project
+  clientSender: ClientUser
+  serviceSender: ServiceUser
+}
