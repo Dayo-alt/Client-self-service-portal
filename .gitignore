@@ -22,3 +22,6 @@ public/admin/assets/
 Thumbs.db
 .vscode/
 .idea/
+
+serviceAccountKey.json
+admin/attached_assets/
