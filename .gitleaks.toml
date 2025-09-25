@@ -1,0 +1,12 @@
+title = "client-self-service-portal secret scan"
+
+[allowlist]
+# Firebase client apiKey (browser key) is not a secret, allow its pattern to prevent false positives.
+# IMPORTANT: Still restrict the key to your domains in Google Cloud Console.
+regexes = [
+  '''AIza[0-9A-Za-z\-_]{35}'''
+]
+
+# Use default built-in rules; no custom rules here. Run with:
+#   gitleaks detect -v -c .gitleaks.toml
+# Or add an npm script: "scan:secrets": "gitleaks detect -v -c .gitleaks.toml"
