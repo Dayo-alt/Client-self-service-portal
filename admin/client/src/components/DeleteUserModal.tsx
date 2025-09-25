@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +61,9 @@ export default function DeleteUserModal({ user, open, onClose }: DeleteUserModal
             </div>
             <span>Delete User</span>
           </DialogTitle>
+          <DialogDescription>
+            This action cannot be undone and will permanently remove this user from your Firebase database.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="py-4">

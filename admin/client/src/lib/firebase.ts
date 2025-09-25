@@ -1,27 +1,33 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  // IMPORTANT: Web uploads must use the appspot.com bucket domain
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export const signInAdmin = async (email: string, password: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    // TEMPORARY: Bypass admin check for setup
-    // const idTokenResult = await userCredential.user.getIdTokenResult();
-    // if (!idTokenResult.claims.admin) {
-    //   await signOut(auth);
-    //   throw new Error("Access denied. Admin privileges required.");
-    // }
+    // Verify admin privileges using custom claims
+    // Force refresh to ensure we read the latest custom claims
+    const idTokenResult = await userCredential.user.getIdTokenResult(true);
+    if (!idTokenResult.claims.admin) {
+      await signOut(auth);
+      throw new Error("Access denied. Admin privileges required.");
+    }
     return userCredential.user;
   } catch (error) {
     throw error;
@@ -41,3 +47,5 @@ export const getIdToken = async () => {
   if (!user) throw new Error("No authenticated user");
   return await user.getIdToken();
 };
+
+export const uploadStorage = storage;

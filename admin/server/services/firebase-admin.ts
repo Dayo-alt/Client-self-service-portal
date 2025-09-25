@@ -3,20 +3,39 @@ import { getAuth } from "firebase-admin/auth";
 import type { UserRecord } from "firebase-admin/auth";
 import type { FirebaseUser, UserStats, UpdateUserData } from "@shared/schema";
 
+// Import the JSON directly (snake_case keys from Firebase)
+import serviceAccount from "../../client-self-service.json";
+
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
-  // TEMPORARY FIX: Environment variables are swapped, so we fix them here
-  const serviceAccount = {
-    projectId: process.env.FIREBASE_CLIENT_EMAIL, // Actually contains the project ID
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_PROJECT_ID, // Actually contains the client email
-  };
-
   initializeApp({
-    credential: cert(serviceAccount),
-    projectId: process.env.FIREBASE_CLIENT_EMAIL, // Actually contains the project ID
+    credential: cert(serviceAccount as any),
   });
 }
+
+// using environment variables
+
+// // Initialize Firebase Admin SDK
+// if (!getApps().length) {
+//   // TEMPORARY FIX: Environment variables are swapped, so we fix them here
+//   // const serviceAccount = {
+//   //   project_Id: process.env.FIREBASE_PROJECT_ID, // Actually contains the project ID
+//   //   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+//   //   clientEmail: process.env.FIREBASE_CLIENT_EMAIL, // Actually contains the client email
+//   // };
+
+//   const serviceAccount = {
+//   projectId: process.env.FIREBASE_PROJECT_ID, // must be exactly project_id
+//   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+//   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+// };
+
+// console.log(serviceAccount, "serviceAccount config");
+//   initializeApp({
+//     credential: cert(serviceAccount),
+//     // projectId: process.env.FIREBASE_PROJECT_ID, // Actually contains the project ID
+//   });
+// }
 
 const auth = getAuth();
 

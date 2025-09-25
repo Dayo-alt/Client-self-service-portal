@@ -1,4 +1,4 @@
-  let selectedRow = null;
+let selectedRow = null;
 
 // Row click selection
 document.querySelectorAll("#invoiceTable tbody tr").forEach(row => {
@@ -54,8 +54,15 @@ const invoices = [
 ];
 
 // Filter + Search Logic
-document.getElementById("searchInvoice").addEventListener("input", filterTable);
-document.getElementById("statusFilter").addEventListener("change", filterTable);
+const searchEl = document.getElementById("searchInvoice");
+if (searchEl) {
+  searchEl.addEventListener("input", filterTable);
+}
+
+const statusEl = document.getElementById("statusFilter");
+if (statusEl) {
+  statusEl.addEventListener("change", filterTable);
+}
 
 function filterTable() {
   const searchVal = document.getElementById("searchInvoice").value.toLowerCase();

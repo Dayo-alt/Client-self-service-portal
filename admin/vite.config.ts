@@ -1,10 +1,13 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import path from "path";
+// import runtimeErrorOverlay from "vite-plugin-runtime-error-overlay";
 
 export default defineConfig({
+  base: "/admin/", // <-- Add this line to set the base path
   plugins: [
     react(),
-    runtimeErrorOverlay(),
+    // runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -23,7 +26,8 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    // Output built admin assets directly into the root public/admin folder
+    outDir: path.resolve(import.meta.dirname, "..", "public", "admin"),
     emptyOutDir: true,
   },
   server: {

@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+   <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+  <script type="text/javascript" src="invoice.js" defer></script>
+  <script>
+     // Navbar avatar init for Settings page
+     (function(){
+       try {
+         var url = localStorage.getItem('user_photo_url');
+         var email = localStorage.getItem('user_email');
+         var img = document.getElementById('navAvatar');
+         var ni = document.getElementById('navInitial');
+         if (url && img) { img.src = url; img.style.display='block'; if (ni) ni.style.display='none'; return; }
+         if (email && ni) { ni.textContent = (email.split('@')[0]||'U').slice(0,1).toUpperCase(); ni.style.display='flex'; }
+       } catch(e) {}
+     })();
+   </script>
+   <!-- Fallback: fetch avatar from Firestore if not in localStorage -->
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+   <script>
+     (function ensureNavAvatar(){
+       try {
+         var url = localStorage.getItem('user_photo_url');
+         var img = document.getElementById('navAvatar');
+         if (url && img) { img.src = url; img.style.display='block'; return; }
+       } catch(e) {}
+
+       try {
+         if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+           firebase.initializeApp({
+             apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+             authDomain: "client-self-service-portal.firebaseapp.com",
+             projectId: "client-self-service-portal",
+             storageBucket: "client-self-service-portal.appspot.com",
+             messagingSenderId: "423657022971",
+             appId: "1:423657022971:web:d58cd5730591b0e121175e",
+             measurementId: "G-EDW6QM7B76"
+           });
+         }
+         var auth = firebase.auth();
+         var db = firebase.firestore();
+         auth.onAuthStateChanged(function(user){
+           if (user && user.uid) {
+             db.collection('profiles').doc(user.uid).get().then(function(snap){
+               var p = snap.data() || {};
+               if (p.photoURL) {
+                 try { localStorage.setItem('user_photo_url', p.photoURL); } catch(e){}
+                 var img = document.getElementById('navAvatar');
+                 if (img) { img.src = p.photoURL; img.style.display='block'; }
+               } else if (p.email) {
+                 var ni = document.getElementById('navInitial');
+                 if (ni) { ni.textContent = (p.email.split('@')[0]||'U').slice(0,1).toUpperCase(); ni.style.display='flex'; }
+               }
+             }).catch(function(){});
+           }
+         });
+       } catch(e){}
+     })();
+   </script>
+  <!-- jsPDF core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- jsPDF AutoTable plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <!-- shared nav + sidebar -->
+ <div class="navbar">
+  <div class="left">
+    <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+  </div>
+
+  <div class="center links">
+    <a href="invoice.html" data-i18n="nav.home">Home</a>
+    <a href="index.html#contact" data-i18n="nav.contact">Contact Us</a>
+  </div>
+
+ <div class="right profile-icon">
+  <select id="langSel" aria-label="Language">
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="es">Español</option>
+    <option value="de">Deutsch</option>
+    <option value="ar">العربية</option>
+    <option value="ja">日本語</option>
+  </select>
+  <a class="nav-avatar" href="profile.html" aria-label="Profile" title="Open Profile">
+    <img id="navAvatar" alt="avatar"
+      style="width:32px;height:32px;border-radius:999px;object-fit:cover;display:block;cursor:pointer;" />
+    <span id="navInitial" class="nav-initial" style="display:none;">U</span>
+  </a>
+</div>
+</div>
+
+<div class="sidebar modern" id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-inner">
+    <nav class="nav">
+      <a href="invoice.html" class="nav-item" title="Invoice">
+        <span class="material-symbols-outlined">bar_chart_4_bars</span>
+        <span class="label" data-i18n="sidebar.invoice">Invoice</span>
+      </a>
+      <a href="ticket.html" class="nav-item" title="Tracking">
+        <span class="material-symbols-outlined">shield</span>
+        <span class="label" data-i18n="sidebar.tracking">Tracking</span>
+      </a>
+      <a href="settings.html" class="nav-item" title="Settings">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="label" data-i18n="sidebar.settings">Settings</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user">
+        <div class="avatar">b</div>
+        <div class="meta">
+          <div class="name">Client</div>
+          <button class="signout" onclick="logout()" data-i18n="auth.signOut">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- content -->
+  <div class="content">
+    <div class="pag">
+  <style>
+    :root {
+  --bg: #f7f8fa;
+  --card: #fff;
+  --muted: #6b7280;
+  --white: #2d3748;
+  --accent: #6366f1;
+  --accent-2: #7c3aed;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --shadow: 0 4px 24px rgba(60,72,88,0.10);
+  font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--white);
+}
+
+.wrap {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 24px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.title small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.sync {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 12px;
+  background: var(--success);
+  box-shadow: 0 0 0 4px rgba(127,183,127,.09);
+}
+.dot.syncing {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(99,102,241,.12);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%{ transform:scale(1); } 50%{ transform:scale(1.2);} 100%{ transform:scale(1); } }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+}
+.panel {
+  background: var(--card);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.panel .h {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+}
+.panel .h .t { font-weight: 700; }
+.panel .b { padding: 16px; }
+
+.sub {
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #f7fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+}
+.sub .info { max-width: 70%; }
+.sub h4 { margin: 0 0 6px 0; font-size: 15px; }
+.meta { color: var(--muted); font-size: 13px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  font-size: 12px;
+  border: none;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px dashed #e2e8f0;
+  font-weight: 600;
+}
+.btn.small { padding: 8px 10px; font-size: 13px; border-radius: 10px; }
+.btn:hover, .btn:focus {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.12);
+  transform: translateY(-2px) scale(1.03);
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+input[type="text"], input[type="password"], input[type="number"], textarea, select, input[type="datetime-local"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f7fafc;
+  color: var(--white);
+  outline: none;
+  font-size: 14px;
+}
+input::placeholder { color: #b6b6b6; }
+
+.inline { display: flex; gap: 12px; align-items: center; }
+.inline.space { justify-content: space-between; }
+
+.toggle {
+  position: relative;
+  width: 56px;
+  height: 32px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  transition: background 0.2s;
+}
+.toggle .knob {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  top: 3px;
+  left: 3px;
+  background: #fff;
+  transition: left .18s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 2px 8px rgba(60,72,88,0.10);
+}
+.toggle.on {
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+}
+.toggle.on .knob { left: 27px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip {
+  background: #f3f4f6;
+  border: 1px solid #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.chip .x { cursor: pointer; opacity: .85; }
+
+.range-wrap { display: flex; gap: 12px; align-items: center; }
+.range-wrap input[type="range"] { width: 100%; }
+
+.help { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+.toast-wrap {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+.toast {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #e0e7ff;
+  color: #2d3748;
+  box-shadow: var(--shadow);
+  border: 1.5px solid #c7d2fe;
+  min-width: 240px;
+  font-weight: 700;
+}
+.toast small {
+  font-weight: 500;
+  display: block;
+  color: #6366f1;
+  margin-top: 6px;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  z-index: 9998;
+}
+.modal {
+  width: 520px;
+  max-width: calc(100% - 40px);
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid #e2e8f0;
+  overflow: hidden;
+}
+.modal .h {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  font-weight: 800;
+  background: #f9fafb;
+}
+.modal .b { padding: 16px; }
+
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+  .wrap { padding: 14px; }
+}
+  </style>
+  <!-- Firebase compat (v9) so old-style firebase.* API works -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <small data-i18n="settings.small">Settings</small>
+        <h1 data-i18n="settings.heading">Manage Service Settings</h1>
+      </div>
+      <div class="sync" id="syncBadge"><div class="dot"></div><div id="syncText" data-i18n="settings.synced">Synced with backend</div></div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Subscription Overview -->
+      <section class="panel">
+        <div class="h"><span class="t" data-i18n="settings.subOverview">Subscription Overview</span><div class="help" data-i18n="settings.subHelp">Manage active services & plans</div></div>
+        <div class="b" id="subsBox">
+          <!-- subscription cards injected here -->
+        </div>
+      </section>
+
+      <!-- RIGHT: Automated Actions & Controls -->
+      <section class="panel">
+        <div class="h"><span class="t" data-i18n="settings.serviceControls">Service Controls</span><div class="help" data-i18n="settings.serviceHelp">Toggle features & set limits</div></div>
+        <div class="b">
+          <div class="row" id="controlsRow">
+            <!-- left column of controls -->
+            <div>
+              <label data-i18n="settings.features">Enable / Disable Features</label>
+              <div class="inline space" style="margin-top:8px;">
+                <span data-i18n="settings.autoScaling">Auto-Scaling</span>
+                <div class="toggle" data-key="features.autoScaling"><div class="knob"></div><input type="checkbox" style="display:none"></div>
+              </div>
+              <div class="inline space" style="margin-top:10px;">
+                <span data-i18n="settings.backups">Daily Backups</span>
+                <div class="toggle" data-key="features.backups"><div class="knob"></div><input type="checkbox" style="display:none"></div>
+              </div>
+              <div class="inline space" style="margin-top:10px;">
+                <span data-i18n="settings.analytics">Advanced Analytics</span>
+                <div class="toggle" data-key="features.analytics"><div class="knob"></div><input type="checkbox" style="display:none"></div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <label for="apiKey" data-i18n="settings.apiKey">API Key</label>
+                <div class="inline" style="gap:8px;">
+                  <input type="password" id="apiKey" readonly />
+                  <button class="btn small ghost" id="toggleKey" data-i18n="common.show">Show</button>
+                  <button class="btn small ghost" id="copyKey" data-i18n="common.copy">Copy</button>
+                  <button class="btn small" id="regenKey" data-i18n="settings.regen">Regenerate</button>
+                </div>
+                <div class="help" data-i18n="settings.apiKeyHelp">This key is used by clients to talk to your service.</div>
+              </div>
+            </div>
+
+            <!-- right column of controls -->
+            <div>
+              <label data-i18n="settings.notifications">Notification Preferences</label>
+              <div class="inline" style="gap:10px;"><input id="nEmail" type="checkbox" /> <span data-i18n="settings.email">Email</span></div>
+              <div style="margin-top:8px;">
+                <label for="nEmailAddress" data-i18n="settings.emailAddress">Email address</label>
+                <input id="nEmailAddress" type="text" placeholder="you@example.com" />
+                <div class="help" data-i18n="settings.emailHelp">Used for email notifications</div>
+              </div>
+              <div class="inline" style="margin-top:12px; gap:10px;"><input id="nSms" type="checkbox" /> <span data-i18n="settings.sms">SMS</span></div>
+              <div style="margin-top:8px;">
+                <label for="nSmsNumber" data-i18n="settings.phone">Phone number</label>
+                <input id="nSmsNumber" type="text" placeholder="e.g., +2348012345678" />
+                <div class="help" data-i18n="settings.smsHelp">Used for SMS notifications</div>
+              </div>
+              <div class="inline" style="margin-top:8px; gap:10px;"><input id="nInApp" type="checkbox" /> <span data-i18n="settings.inApp">In-App</span></div>
+
+              <label style="margin-top:12px" data-i18n="settings.frequency">Frequency</label>
+              <select id="nFreq">
+                <option data-i18n="settings.immediate">Immediate</option>
+                <option data-i18n="settings.hourly">Hourly Digest</option>
+                <option data-i18n="settings.daily">Daily Digest</option>
+                <option data-i18n="settings.weekly">Weekly Digest</option>
+              </select>
+
+              <div style="margin-top:14px;">
+                <label data-i18n="settings.allowedIps">Allowed IP Addresses</label>
+                <div class="inline" style="gap:8px;">
+                  <input type="text" id="ipInput" placeholder="e.g., 192.168.0.25" />
+                  <button class="btn small" id="addIp" data-i18n="settings.addIp">Add</button>
+                </div>
+                <div class="chips" id="ipChips"></div>
+                <div class="help" data-i18n="settings.whitelistHelp">Whitelist specific IPs for sensitive endpoints.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            <div>
+              <label data-i18n="settings.bandwidth">Bandwidth Limit (GB / month)</label>
+              <div class="range-wrap">
+                <input type="range" id="bwRange" min="10" max="1000" step="10" />
+                <input type="number" id="bwNumber" min="10" max="1000" step="10" style="width:110px;" />
+              </div>
+              <div class="help" data-i18n="settings.bandwidthHelp">Larger value allows more data transfer per month.</div>
+            </div>
+            <div>
+              <label data-i18n="settings.backend">Backend Integration</label>
+              <div class="help" data-i18n="settings.backendHelp">Changes propagate instantly to your provisioning / CRM system.</div>
+              <div class="inline" style="margin-top:8px;">
+                <button class="btn small" id="forceSync" data-i18n="settings.forceSync">Force Sync Now</button>
+                <div class="help" id="lastSync" style="margin-left:8px;" data-i18n="settings.lastSynced">Last synced just now.</div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border-color: rgba(255,255,255,0.04); margin:16px 0;" />
+
+          <label for="pauseStart" data-i18n="settings.pauseLabel">Schedule a pause (service temporarily stopped)</label>
+          <div class="row">
+            <div>
+              <input type="datetime-local" id="pauseStart" />
+              <div class="help" data-i18n="settings.pauseStart">When should the pause start?</div>
+            </div>
+            <div>
+              <input type="datetime-local" id="pauseEnd" />
+              <div class="help" data-i18n="settings.pauseEnd">When should the service resume?</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn small" id="setPause" data-i18n="settings.setSchedule">Set Schedule</button>
+            <button class="btn small ghost" id="clearPause" data-i18n="settings.clearSchedule">Clear Schedule</button>
+            <div id="pauseStatus" class="help" style="margin-top:10px;" data-i18n="settings.noPause">No pause scheduled.</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <label data-i18n="settings.reactivation">Reactivation</label>
+            <div class="inline" style="gap:12px;">
+              <button class="btn" id="reactivateNow" data-i18n="settings.reactivate">Request Immediate Reactivation</button>
+              <div class="help" data-i18n="settings.reactivateHelp">Bring services back online now.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-wrap" id="toasts"></div>
+
+    <!-- Modal: Change Plan -->
+    <div class="backdrop" id="modalBg" role="dialog" aria-modal="true">
+      <div class="modal">
+        <div class="h" data-i18n="settings.changePlan">Change Plan</div>
+        <div class="b">
+          <div id="planList"></div>
+          <div class="inline" style="justify-content:flex-end; margin-top:10px; gap:8px;">
+            <button class="btn small ghost" id="cancelPlan" data-i18n="settings.cancel">Cancel</button>
+            <button class="btn small" id="savePlan" data-i18n="settings.save">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+  /***********************
+   *  CONFIG — REQUIRED  *
+   ***********************
+   * Replace the firebaseConfig below with your project's config.
+   * Replace USER_DOC_ID with a proper ID (user id or account id).
+   *
+   * Example: const USER_DOC_ID = "user_abc123";
+   ************************/
+  const firebaseConfig = {  
+    apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+    authDomain: "client-self-service-portal.firebaseapp.com",
+    projectId: "client-self-service-portal",
+    storageBucket: "client-self-service-portal.firebasestorage.app",
+    messagingSenderId: "423657022971",
+    appId: "1:423657022971:web:d58cd5730591b0e121175e",
+    measurementId: "G-EDW6QM7B76"
+  };
+
+  // ✅ Define your user doc ID here (instead of stray .set call)
+  const USER_DOC_ID = "dayo123"; // change this to your actual user id or doc id
+
+  // ---------- tiny helpers ----------
+  function $(s){ return document.querySelector(s); }
+  function el(t,a={},children=[]){ const d=document.createElement(t); for(const k in a){ if(k==='class') d.className=a[k]; else if(k==='html') d.innerHTML=a[k]; else d.setAttribute(k,a[k]); } (children||[]).forEach(c=>d.appendChild(c)); return d; }
+  function showToast(title, desc='', ttl=3500){
+    // Respect in-app notifications toggle (from current state or persisted localStorage)
+    try {
+      if (typeof state !== 'undefined' && state?.notifications && state.notifications.inApp === false) return;
+      const raw = localStorage.getItem('svc-settings-state');
+      if (raw) {
+        const st = JSON.parse(raw);
+        if (st && st.notifications && st.notifications.inApp === false) return; // suppressed
+      }
+    } catch(e) {}
+    const t=el('div',{class:'toast', html:`<div>${title}</div>${desc?`<small>${desc}</small>`:''}`});
+    $('#toasts').appendChild(t);
+    setTimeout(()=> t.style.opacity='0.02', ttl-350);
+    setTimeout(()=> t.remove(), ttl);
+  }
+
+  // ... 🔽 everything else in your script stays the same 🔽 ...
+
+
+    // ---------- Default state ----------
+    const defaultState = {
+      subscriptions: [
+        { id:'sub1', name:'Cloud Storage', plan:'Pro', price:29, period:'mo', expiry:'2025-12-31', status:'Active' },
+        { id:'sub2', name:'API Access', plan:'Basic', price:9, period:'mo', expiry:'2025-10-15', status:'Active' }
+      ],
+      features: { autoScaling:true, backups:true, analytics:false },
+      apiKey: genKey(),
+      // Start with Email/SMS toggles OFF by default
+      notifications: { email:false, sms:false, inApp:true, frequency:'Immediate', emailAddress:'', smsNumber:'' },
+      allowedIPs: ['192.168.0.25'],
+      bandwidth: 200,
+      pause: null, // { startISO, endISO }
+      lastSynced: Date.now()
+    };
+
+    // Local state (will be replaced by DB if available)
+    let state = loadLocalState() || defaultState;
+
+    // ---------- persistence helpers ----------
+    function loadLocalState(){ try{ const raw = localStorage.getItem('svc-settings-state'); if(raw) return JSON.parse(raw); }catch(e){} return null; }
+    function saveLocalState(){ try{ localStorage.setItem('svc-settings-state', JSON.stringify(state)); }catch(e){} }
+    function genKey(){ const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let s='sk_live_'; for(let i=0;i<28;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+    function timeAgo(ts){ const s=Math.floor((Date.now()-ts)/1000); if(s<60) return s+'s'; const m=Math.floor(s/60); if(m<60) return m+'m'; const h=Math.floor(m/60); if(h<24) return h+'h'; const d=Math.floor(h/24); return d+'d'; }
+
+    // ---------- UI renderers ----------
+    function renderSubs(){
+      const box = $('#subsBox'); box.innerHTML='';
+      state.subscriptions.forEach(sub=>{
+        const left = el('div',{class:'info'});
+        left.appendChild(el('h4',{html: `${sub.name} <span class="pill">${sub.plan}</span>`}));
+        left.appendChild(el('div',{class:'meta', html: `Expires ${sub.expiry} • $${sub.price}/${sub.period}`}));
+        const right = el('div');
+        const btn = el('button',{class:'btn small'}); btn.textContent='Upgrade / Downgrade';
+        btn.addEventListener('click', ()=> openPlanModal(sub.id));
+        right.appendChild(btn);
+        const row = el('div',{class:'sub'});
+        row.appendChild(left); row.appendChild(right);
+        box.appendChild(row);
+      });
+    }
+
+    // toggles
+    function renderToggles(){
+      document.querySelectorAll('.toggle').forEach(tg=>{
+        const key = tg.getAttribute('data-key'); // e.g., "features.autoScaling"
+        const val = getNested(state, key);
+        tg.classList.toggle('on', !!val);
+        const input = tg.querySelector('input');
+        if(input) input.checked = !!val;
+        // click
+        tg.onclick = () => {
+          const now = !tg.classList.contains('on');
+          tg.classList.toggle('on', now);
+          setNested(state, key, now);
+          saveLocalState();
+          showToast('Feature updated', `${key.split('.').pop()} is ${now?'enabled':'disabled'}`);
+          syncToBackendDebounced();
+        };
+      });
+    }
+
+    function renderApiKey(){
+      $('#apiKey').value = state.apiKey || '';
+    }
+
+    function renderNotifications(){
+      $('#nEmail').checked = !!state.notifications.email;
+      $('#nSms').checked = !!state.notifications.sms;
+      $('#nInApp').checked = !!state.notifications.inApp;
+      $('#nFreq').value = state.notifications.frequency || 'Immediate';
+      const emailEl = document.getElementById('nEmailAddress');
+      const smsEl = document.getElementById('nSmsNumber');
+      if (emailEl) emailEl.value = state.notifications.emailAddress || '';
+      if (smsEl) smsEl.value = state.notifications.smsNumber || '';
+    }
+
+    function renderIPs(){
+      const box = $('#ipChips'); box.innerHTML = '';
+      (state.allowedIPs||[]).forEach(ip=>{
+        const c = el('div',{class:'chip'},[document.createTextNode(ip)]);
+        const x = el('span',{class:'x', html:'\u2715'});
+        x.onclick = ()=>{
+          state.allowedIPs = state.allowedIPs.filter(v=>v!==ip);
+          saveLocalState();
+          renderIPs();
+          showToast('Removed IP', ip);
+          syncToBackendDebounced();
+        };
+        c.appendChild(x); box.appendChild(c);
+      });
+    }
+
+    function renderBandwidth(){
+      $('#bwRange').value = state.bandwidth || 10;
+      $('#bwNumber').value = state.bandwidth || 10;
+    }
+
+    function renderPause(){
+      const p = state.pause;
+      if(!p){ $('#pauseStatus').textContent = 'No pause scheduled.'; return; }
+      const s = new Date(p.startISO); const e = new Date(p.endISO);
+      $('#pauseStatus').textContent = `Paused from ${s.toLocaleString()} to ${e.toLocaleString()}.`;
+    }
+
+    function renderSyncBadge(){
+      const dot = $('#syncBadge .dot'); const txt = $('#syncText');
+      dot.classList.remove('syncing'); dot.style.background = 'var(--good)';
+      txt.textContent = 'Synced with backend';
+      $('#lastSync').textContent = 'Last synced ' + timeAgo(state.lastSynced) + '.';
+    }
+
+    function renderAll(){ renderSubs(); renderToggles(); renderApiKey(); renderNotifications(); renderIPs(); renderBandwidth(); renderPause(); renderSyncBadge(); }
+
+    // nested object helpers (key like "features.autoScaling")
+    function getNested(obj, key){ return key.split('.').reduce((o,k)=> o ? o[k] : undefined, obj); }
+    function setNested(obj, key, value){
+      const parts = key.split('.'); let cur = obj;
+      for(let i=0;i<parts.length-1;i++){ if(!cur[parts[i]]) cur[parts[i]] = {}; cur = cur[parts[i]]; }
+      cur[parts[parts.length-1]] = value;
+    }
+
+    // ---------- Plan modal ----------
+    const plans = [
+      { name:'Basic', price:9, features:'Good for starters' },
+      { name:'Pro', price:29, features:'More power & support' },
+      { name:'Enterprise', price:99, features:'Highest limits & SLA' }
+    ];
+    let modalSubId = null;
+
+    function openPlanModal(subId){
+      modalSubId = subId;
+      const list = $('#planList'); list.innerHTML='';
+      const current = state.subscriptions.find(s=>s.id===subId).plan;
+      plans.forEach(p=>{
+        const row = el('label',{class:'plan'});
+        const radio = el('input',{type:'radio', name:'planRadio', value:p.name});
+        if(p.name === current) radio.checked = true;
+        const left = el('div',{html:`<div style="font-weight:800;">${p.name}</div><div class="help">${p.features}</div>`});
+        const right = el('div',{html:`<div style="font-weight:800;">$${p.price}/mo</div>`});
+        row.appendChild(radio); row.appendChild(left); row.appendChild(right);
+        list.appendChild(row);
+      });
+      $('#modalBg').style.display = 'flex';
+    }
+    function closePlanModal(){ $('#modalBg').style.display = 'none'; }
+    $('#cancelPlan').addEventListener('click', closePlanModal);
+    $('#savePlan').addEventListener('click', ()=>{
+      const checked = document.querySelector('input[name="planRadio"]:checked');
+      if(!checked) { closePlanModal(); return; }
+      const newPlan = checked.value;
+      const sub = state.subscriptions.find(s=>s.id===modalSubId);
+      const pj = plans.find(p=>p.name===newPlan);
+      if(sub){ sub.plan = pj.name; sub.price = pj.price; saveLocalState(); renderSubs(); showToast('Plan updated', `${sub.name} → ${pj.name} ($${pj.price}/mo)`); syncToBackend(); }
+      closePlanModal();
+    });
+
+    // ---------- interactions ----------
+    $('#toggleKey').addEventListener('click', ()=>{
+      const inp = $('#apiKey'); const isPwd = inp.type === 'password';
+      inp.type = isPwd ? 'text' : 'password'; $('#toggleKey').textContent = isPwd ? 'Hide' : 'Show';
+    });
+    $('#copyKey').addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText($('#apiKey').value); showToast('Copied','API key copied'); }catch(e){ showToast('Copy failed','Browser blocked copy'); }
+    });
+    $('#regenKey').addEventListener('click', ()=>{
+      state.apiKey = genKey(); saveLocalState(); renderApiKey(); showToast('New API key','Regenerated'); syncToBackend();
+    });
+
+    // notification input listeners
+    ['nEmail','nSms','nInApp','nFreq'].forEach(id=>{
+      document.getElementById(id).addEventListener('change', ()=>{
+        state.notifications = {
+          email: !!$('#nEmail').checked,
+          sms: !!$('#nSms').checked,
+          inApp: !!$('#nInApp').checked,
+          frequency: $('#nFreq').value,
+          emailAddress: (function(){ const el = document.getElementById('nEmailAddress'); return (el && el instanceof HTMLInputElement) ? el.value : ''; })(),
+          smsNumber: (function(){ const el = document.getElementById('nSmsNumber'); return (el && el instanceof HTMLInputElement) ? el.value : ''; })()
+        };
+        saveLocalState();
+        // Show note if toggled on and value is present
+        if (id === 'nEmail') {
+          if (state.notifications.email) {
+            if (state.notifications.emailAddress) {
+              sendEmailNote(state.notifications.emailAddress);
+            } else {
+              showToast('Email required','Enter your email address');
+            }
+          }
+        }
+        if (id === 'nSms') {
+          if (state.notifications.sms) {
+            if (state.notifications.smsNumber) {
+              sendSmsNote(state.notifications.smsNumber);
+            } else {
+              showToast('Phone required','Enter your phone number');
+            }
+          }
+        }
+        showToast('Notification preferences saved');
+        syncToBackendDebounced();
+      });
+    });
+
+    // Listen for entering email/phone when toggles are already on
+    const emailInputEl = document.getElementById('nEmailAddress');
+    if (emailInputEl) emailInputEl.addEventListener('change', (e)=>{
+      const val = (e && e.target && typeof e.target.value === 'string') ? e.target.value.trim() : '';
+      state.notifications.emailAddress = val;
+      saveLocalState();
+      if ($('#nEmail').checked && val) {
+        sendEmailNote(val);
+      }
+      syncToBackendDebounced();
+    });
+    const smsInputEl = document.getElementById('nSmsNumber');
+    if (smsInputEl) smsInputEl.addEventListener('change', (e)=>{
+      const val = (e && e.target && typeof e.target.value === 'string') ? e.target.value.trim() : '';
+      state.notifications.smsNumber = val;
+      saveLocalState();
+      if ($('#nSms').checked && val) {
+        sendSmsNote(val);
+      }
+      syncToBackendDebounced();
+    });
+
+    // --- helpers to send notes ---
+    function sendEmailNote(email){
+      const message = 'Good Day Sir/Ma you successfully activated email service';
+      // Try backend endpoint if available
+      try {
+        fetch('http://localhost:5000/api/notify/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: email, subject: 'Notification Activated', message })
+        }).then(()=>{
+          showToast('Email sent', email);
+        }).catch(()=>{
+          // Fallback: just toast
+          showToast('Email activation noted', email);
+        });
+      } catch(e){
+        showToast('Email activation noted', email);
+      }
+    }
+
+    function sendSmsNote(number){
+      const message = 'Good Day Sir/Ma you successfully activated SMS service';
+      try {
+        fetch('http://localhost:5000/api/notify/sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: number, message })
+        }).then(()=>{
+          showToast('SMS sent', number);
+        }).catch(()=>{
+          showToast('SMS activation noted', number);
+        });
+      } catch(e){
+        showToast('SMS activation noted', number);
+      }
+    }
+
+    // IPs
+    $('#addIp').addEventListener('click', ()=>{
+      const ip = $('#ipInput').value.trim();
+      if(!ip) return;
+      if(!/^((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3})$/.test(ip)){
+        showToast('Invalid IP','Enter IPv4 like 192.168.0.25'); return;
+      }
+      if(state.allowedIPs.includes(ip)){ showToast('Duplicate IP','Already allowed'); return; }
+      state.allowedIPs.push(ip); $('#ipInput').value=''; saveLocalState(); renderIPs(); showToast('IP added', ip); syncToBackend();
+    });
+
+    // bandwidth
+    $('#bwRange').addEventListener('input', e=> { $('#bwNumber').value = e.target.value; });
+    $('#bwRange').addEventListener('change', e=> { state.bandwidth = Number(e.target.value); saveLocalState(); showToast('Bandwidth updated', state.bandwidth+' GB/month'); syncToBackendDebounced(); });
+    $('#bwNumber').addEventListener('change', e=> { const v = Number(e.target.value)||10; state.bandwidth = Math.min(1000, Math.max(10, v)); renderBandwidth(); saveLocalState(); showToast('Bandwidth updated', state.bandwidth+' GB/month'); syncToBackendDebounced(); });
+
+    // pause/reactivate
+    $('#setPause').addEventListener('click', ()=>{
+      const s = $('#pauseStart').value, e = $('#pauseEnd').value;
+      if(!s||!e){ showToast('Missing times','Choose start and end'); return; }
+      if(new Date(s) >= new Date(e)){ showToast('Invalid range','End must be after start'); return; }
+      state.pause = { startISO: s, endISO: e }; saveLocalState(); renderPause(); showToast('Pause scheduled','Service will pause at chosen time'); syncToBackend();
+    });
+    $('#clearPause').addEventListener('click', ()=>{ state.pause=null; saveLocalState(); renderPause(); showToast('Pause cleared'); syncToBackend(); });
+    $('#reactivateNow').addEventListener('click', ()=>{ state.pause=null; saveLocalState(); renderPause(); showToast('Reactivation requested'); syncToBackend(); });
+
+    // force sync
+    $('#forceSync').addEventListener('click', ()=>{ syncToBackend(true); });
+
+    // modal close on backdrop
+    $('#modalBg').addEventListener('click', (e)=>{ if(e.target.id==='modalBg') closePlanModal(); });
+
+    // ---------- Firebase wiring ----------
+    let db = null;
+    let settingsDoc = null;
+    let syncTimer = null;
+    let lastLocalSync = 0;
+
+    function initFirebase(){
+      try{
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        settingsDoc = db.collection('serviceSettings').doc(USER_DOC_ID);
+        // listen for remote updates
+        settingsDoc.onSnapshot((doc)=>{
+          if(!doc.exists) return;
+          const remote = doc.data();
+          // Avoid overriding local edits that are very fresh:
+          // If we recently did a local sync (<1s), prefer local for a tiny bit to avoid race.
+          const now = Date.now();
+          if(now - lastLocalSync < 800) {
+            // merge but do not clobber immediate local changes
+            state = { ...remote, ...state };
+          } else {
+            state = { ...state, ...remote };
+          }
+          saveLocalState();
+          renderAll();
+        }, err => {
+          console.error('onSnapshot error', err);
+          showToast('Realtime error', err.message || 'Check console');
+        });
+
+        // initial read: if doc exists we use it; else push local default
+        settingsDoc.get().then(doc=>{
+          if(doc.exists){
+            state = { ...state, ...doc.data() };
+            saveLocalState();
+            renderAll();
+          } else {
+            // write initial local state to backend
+            syncToBackend(true);
+          }
+        }).catch(e=>{
+          console.warn('Initial read failed', e);
+          // still render local
+          renderAll();
+        });
+
+      }catch(e){
+        console.error('Firebase init failed', e);
+        showToast('Firebase init failed', 'Insert correct config and ensure Firestore is enabled.');
+        renderAll();
+      }
+    }
+
+    // full sync (immediate when urgent). If immediate flag true, do not debounce.
+    function syncToBackend(immediate=false){
+      if(!settingsDoc){ console.warn('No settingsDoc configured'); showToast('Not connected', 'Insert firebaseConfig & USER_DOC_ID'); return Promise.resolve(); }
+      if(!immediate){
+        return syncToBackendDebounced();
+      }
+      // write current state to firestore
+      const payload = { ...state, lastSynced: Date.now() };
+      lastLocalSync = Date.now();
+      // keep only JSON-serializable fields (state is safe)
+      return settingsDoc.set(payload, { merge:true })
+        .then(()=>{
+          state.lastSynced = payload.lastSynced;
+          saveLocalState();
+          renderSyncBadge();
+        })
+        .catch(err=>{
+          console.error('sync error', err);
+          showToast('Sync failed', err.message || 'See console');
+        });
+    }
+
+    function syncToBackendDebounced(){
+      if(!settingsDoc){ showToast('Not connected', 'Insert firebaseConfig & USER_DOC_ID'); return Promise.resolve(); }
+      clearTimeout(syncTimer);
+      const badgeDot = $('#syncBadge .dot');
+      const syncTxt = $('#syncText');
+      badgeDot.classList.add('syncing'); syncTxt.textContent = 'Syncing to backend…';
+      return new Promise((resolve)=>{
+        syncTimer = setTimeout(()=>{
+          const payload = { ...state, lastSynced: Date.now() };
+          lastLocalSync = Date.now();
+          settingsDoc.set(payload, { merge:true })
+            .then(()=> {
+              state.lastSynced = payload.lastSynced;
+              saveLocalState();
+              badgeDot.classList.remove('syncing');
+              syncTxt.textContent = 'Synced with backend';
+              $('#lastSync').textContent = 'Last synced ' + timeAgo(state.lastSynced) + '.';
+              resolve();
+            })
+            .catch(err=>{
+              console.error('debounced sync error', err);
+              badgeDot.classList.remove('syncing');
+              syncTxt.textContent = 'Sync error';
+              showToast('Sync failed', err.message || 'See console');
+              resolve();
+            });
+        }, 650); // 650ms debounce
+      });
+    }
+
+    // ---------- boot ----------
+    function boot(){
+      renderAll();
+      // wire some immediate UI listeners (that need to reflect state)
+      $('#bwRange').value = state.bandwidth; $('#bwNumber').value = state.bandwidth;
+      // parity: toggles already handled in renderToggles
+      // listen to manual small items (range number input change handled already)
+      // when user interacts with the knobs we already call syncToBackendDebounced in handlers above
+    }
+
+    // initialize UI from local state and then init Firebase
+    document.addEventListener('DOMContentLoaded', ()=>{
+      boot();
+      // initialize firebase after render so UI shows up even if config absent
+      initFirebase();
+    });
+
+    // ---------- utilities for quick save actions (used by many handlers) ----------
+    function quickSaveAndSync(desc){
+      saveLocalState();
+      showToast(desc || 'Saved');
+      syncToBackendDebounced();
+    }
+
+    // override simulateBackendSync calls in older code: expose global simulateBackendSync
+    function simulateBackendSync(){ syncToBackend(); }
+
+    // Expose some functions to window for ease of testing from console (optional)
+    window._svc = {
+      getState: ()=>state,
+      syncNow: ()=>syncToBackend(true),
+      simulateBackendSync
+    };
+  </script>
+  <script>
+    (function(){
+      const I18N = {
+        en: {
+          nav: { home: "Home", contact: "Contact Us" },
+          sidebar: { invoice: "Invoice", tracking: "Tracking", settings: "Settings" },
+          auth: { signOut: "Sign out" },
+          settings: {
+            small: "Settings", heading: "Manage Service Settings", synced: "Synced with backend",
+            subOverview: "Subscription Overview", subHelp: "Manage active services & plans",
+            serviceControls: "Service Controls", serviceHelp: "Toggle features & set limits",
+            apiKey: "API Key", apiKeyHelp: "This key is used by clients to talk to your service.",
+            notifications: "Notification Preferences", emailAddress: "Email address", emailHelp: "Used for email notifications",
+            phone: "Phone number", smsHelp: "Used for SMS notifications", frequency: "Frequency",
+            allowedIps: "Allowed IP Addresses", whitelistHelp: "Whitelist specific IPs for sensitive endpoints.",
+            bandwidth: "Bandwidth Limit (GB / month)", bandwidthHelp: "Larger value allows more data transfer per month.",
+            backend: "Backend Integration", backendHelp: "Changes propagate instantly to your provisioning / CRM system.",
+            forceSync: "Force Sync Now", lastSynced: "Last synced just now.",
+            pauseLabel: "Schedule a pause (service temporarily stopped)", pauseStart: "When should the pause start?", pauseEnd: "When should the service resume?",
+            setSchedule: "Set Schedule", clearSchedule: "Clear Schedule", noPause: "No pause scheduled.",
+            reactivation: "Reactivation", reactivate: "Request Immediate Reactivation", reactivateHelp: "Bring services back online now.",
+            features: "Enable / Disable Features", autoScaling: "Auto-Scaling", backups: "Daily Backups", analytics: "Advanced Analytics",
+            email: "Email", sms: "SMS", inApp: "In-App", immediate: "Immediate", hourly: "Hourly Digest", daily: "Daily Digest", weekly: "Weekly Digest",
+            addIp: "Add", changePlan: "Change Plan", cancel: "Cancel", save: "Save", regen: "Regenerate",
+          }
+        },
+        fr: {
+          nav: { home: "Accueil", contact: "Nous contacter" },
+          sidebar: { invoice: "Facture", tracking: "Suivi", settings: "Paramètres" },
+          auth: { signOut: "Se déconnecter" },
+          settings: {
+            small: "Paramètres", heading: "Gérer les paramètres du service", synced: "Synchronisé avec le backend",
+            subOverview: "Aperçu des abonnements", subHelp: "Gérer les services et offres actifs",
+            serviceControls: "Contrôles du service", serviceHelp: "Activer/désactiver des fonctionnalités et définir des limites",
+            apiKey: "Clé API", apiKeyHelp: "Cette clé est utilisée par les clients pour parler à votre service.",
+            notifications: "Préférences de notification", emailAddress: "Adresse e-mail", emailHelp: "Utilisée pour les notifications e-mail",
+            phone: "Numéro de téléphone", smsHelp: "Utilisé pour les notifications SMS", frequency: "Fréquence",
+            allowedIps: "Adresses IP autorisées", whitelistHelp: "Lister les IPs autorisées pour les endpoints sensibles.",
+            bandwidth: "Limite de bande passante (Go / mois)", bandwidthHelp: "Une valeur plus élevée permet plus de transfert de données par mois.",
+            backend: "Intégration backend", backendHelp: "Les changements se propagent instantanément à votre système.",
+            forceSync: "Forcer la synchronisation", lastSynced: "Dernière synchronisation à l’instant.",
+            pauseLabel: "Planifier une pause (service temporairement arrêté)", pauseStart: "Quand la pause doit-elle commencer ?", pauseEnd: "Quand le service doit-il reprendre ?",
+            setSchedule: "Définir le planning", clearSchedule: "Effacer le planning", noPause: "Aucune pause planifiée.",
+            reactivation: "Réactivation", reactivate: "Demander une réactivation immédiate", reactivateHelp: "Remettre les services en ligne maintenant.",
+            features: "Activer / Désactiver des fonctionnalités", autoScaling: "Auto‑scaling", backups: "Sauvegardes quotidiennes", analytics: "Analyses avancées",
+            email: "E‑mail", sms: "SMS", inApp: "In‑App", immediate: "Immédiat", hourly: "Récapitulatif horaire", daily: "Récapitulatif quotidien", weekly: "Récapitulatif hebdomadaire",
+            addIp: "Ajouter", changePlan: "Changer d’offre", cancel: "Annuler", save: "Enregistrer", regen: "Régénérer",
+          }
+        },
+        es: {
+          nav: { home: "Inicio", contact: "Contáctanos" },
+          sidebar: { invoice: "Factura", tracking: "Seguimiento", settings: "Configuración" },
+          auth: { signOut: "Cerrar sesión" },
+          settings: {
+            small: "Configuración", heading: "Administrar configuración del servicio", synced: "Sincronizado con el backend",
+            subOverview: "Resumen de suscripción", subHelp: "Gestiona servicios y planes activos",
+            serviceControls: "Controles del servicio", serviceHelp: "Activa funciones y establece límites",
+            apiKey: "Clave API", apiKeyHelp: "Esta clave la usan los clientes para tu servicio.",
+            notifications: "Preferencias de notificación", emailAddress: "Correo electrónico", emailHelp: "Usado para notificaciones por correo",
+            phone: "Número de teléfono", smsHelp: "Usado para notificaciones SMS", frequency: "Frecuencia",
+            allowedIps: "Direcciones IP permitidas", whitelistHelp: "Permite IPs para endpoints sensibles.",
+            bandwidth: "Límite de ancho de banda (GB/mes)", bandwidthHelp: "Un valor mayor permite más datos por mes.",
+            backend: "Integración backend", backendHelp: "Los cambios se propagan al momento.",
+            forceSync: "Forzar sincronización", lastSynced: "Última sincronización ahora.",
+            pauseLabel: "Programar pausa (servicio detenido temporalmente)", pauseStart: "¿Cuándo empieza la pausa?", pauseEnd: "¿Cuándo se reanuda el servicio?",
+            setSchedule: "Programar", clearSchedule: "Borrar", noPause: "Sin pausas programadas.",
+            reactivation: "Reactivación", reactivate: "Solicitar reactivación inmediata", reactivateHelp: "Volver el servicio en línea ahora.",
+            features: "Activar / Desactivar funciones", autoScaling: "Auto‑escalado", backups: "Copias diarias", analytics: "Analítica avanzada",
+            email: "Correo", sms: "SMS", inApp: "En la app", immediate: "Inmediato", hourly: "Resumen por hora", daily: "Resumen diario", weekly: "Resumen semanal",
+            addIp: "Añadir", changePlan: "Cambiar plan", cancel: "Cancelar", save: "Guardar", regen: "Regenerar",
+          }
+        },
+        de: {
+          nav: { home: "Startseite", contact: "Kontakt" },
+          sidebar: { invoice: "Rechnung", tracking: "Verfolgung", settings: "Einstellungen" },
+          auth: { signOut: "Abmelden" },
+          settings: {
+            small: "Einstellungen", heading: "Dienst‑Einstellungen verwalten", synced: "Mit Backend synchron",
+            subOverview: "Abo‑Übersicht", subHelp: "Aktive Dienste & Pläne verwalten",
+            serviceControls: "Dienst‑Steuerung", serviceHelp: "Funktionen umschalten & Limits setzen",
+            apiKey: "API‑Schlüssel", apiKeyHelp: "Diesen Schlüssel nutzen Clients für Ihren Dienst.",
+            notifications: "Benachrichtigungseinstellungen", emailAddress: "E‑Mail‑Adresse", emailHelp: "Für E‑Mail‑Benachrichtigungen",
+            phone: "Telefonnummer", smsHelp: "Für SMS‑Benachrichtigungen", frequency: "Häufigkeit",
+            allowedIps: "Erlaubte IP‑Adressen", whitelistHelp: "Erlauben Sie IPs für sensible Endpunkte.",
+            bandwidth: "Bandbreitenlimit (GB/Monat)", bandwidthHelp: "Größerer Wert erlaubt mehr Daten.",
+            backend: "Backend‑Integration", backendHelp: "Änderungen werden sofort übernommen.",
+            forceSync: "Jetzt synchronisieren", lastSynced: "Zuletzt soeben synchronisiert.",
+            pauseLabel: "Pause planen (Dienst vorübergehend angehalten)", pauseStart: "Wann beginnt die Pause?", pauseEnd: "Wann wird fortgesetzt?",
+            setSchedule: "Planen", clearSchedule: "Löschen", noPause: "Keine Pause geplant.",
+            reactivation: "Reaktivierung", reactivate: "Sofortige Reaktivierung anfordern", reactivateHelp: "Dienst jetzt online bringen.",
+            features: "Funktionen aktivieren/deaktivieren", autoScaling: "Auto‑Scaling", backups: "Tägliche Backups", analytics: "Erweiterte Analysen",
+            email: "E‑Mail", sms: "SMS", inApp: "In‑App", immediate: "Sofort", hourly: "Stündliche Übersicht", daily: "Tägliche Übersicht", weekly: "Wöchentliche Übersicht",
+            addIp: "Hinzufügen", changePlan: "Paket ändern", cancel: "Abbrechen", save: "Speichern", regen: "Neu erzeugen",
+          }
+        },
+        ar: {
+          nav: { home: "الرئيسية", contact: "اتصل بنا" },
+          sidebar: { invoice: "الفواتير", tracking: "التذاكر", settings: "الإعدادات" },
+          auth: { signOut: "تسجيل الخروج" },
+          settings: {
+            small: "الإعدادات", heading: "إدارة إعدادات الخدمة", synced: "تمت المزامنة مع الخادم",
+            subOverview: "نظرة عامة على الاشتراك", subHelp: "إدارة الخدمات والخطط النشطة",
+            serviceControls: "ضوابط الخدمة", serviceHelp: "تبديل الميزات وتعيين الحدود",
+            apiKey: "مفتاح API", apiKeyHelp: "يستخدمه العملاء للتواصل مع خدمتك.",
+            notifications: "تفضيلات الإشعارات", emailAddress: "البريد الإلكتروني", emailHelp: "يُستخدم لإشعارات البريد",
+            phone: "رقم الهاتف", smsHelp: "يُستخدم لإشعارات SMS", frequency: "التكرار",
+            allowedIps: "عناوين IP المسموح بها", whitelistHelp: "السماح بعناوين IP لنقاط النهاية الحساسة.",
+            bandwidth: "حد النطاق (GB/شهر)", bandwidthHelp: "القيمة الأكبر تسمح ببيانات أكثر شهريًا.",
+            backend: "تكامل الخلفية", backendHelp: "تُطبق التغييرات فورًا.",
+            forceSync: "مزامنة الآن", lastSynced: "تمت المزامنة للتو.",
+            pauseLabel: "جدولة الإيقاف المؤقت (إيقاف الخدمة مؤقتًا)", pauseStart: "متى يبدأ الإيقاف؟", pauseEnd: "متى يستأنف؟",
+            setSchedule: "تعيين الجدول", clearSchedule: "مسح الجدول", noPause: "لا يوجد إيقاف مجدول.",
+            reactivation: "إعادة التفعيل", reactivate: "طلب إعادة تفعيل فورية", reactivateHelp: "إعادة الخدمة الآن.",
+            features: "تفعيل/تعطيل الميزات", autoScaling: "التوسّع التلقائي", backups: "نسخ احتياطي يومي", analytics: "تحليلات متقدمة",
+            email: "البريد", sms: "رسائل SMS", inApp: "داخل التطبيق", immediate: "فوري", hourly: "ملخص كل ساعة", daily: "ملخص يومي", weekly: "ملخص أسبوعي",
+            addIp: "إضافة", changePlan: "تغيير الخطة", cancel: "إلغاء", save: "حفظ", regen: "إعادة توليد",
+          }
+        },
+        ja: {
+          nav: { home: "ホーム", contact: "お問い合わせ" },
+          sidebar: { invoice: "請求書", tracking: "チケット", settings: "設定" },
+          auth: { signOut: "サインアウト" },
+          settings: {
+            small: "設定", heading: "サービス設定を管理", synced: "バックエンドと同期済み",
+            subOverview: "サブスクリプション概要", subHelp: "アクティブなサービスとプランを管理",
+            serviceControls: "サービス制御", serviceHelp: "機能切替と上限設定",
+            apiKey: "APIキー", apiKeyHelp: "クライアントがサービスに接続するために使用。",
+            notifications: "通知設定", emailAddress: "メールアドレス", emailHelp: "メール通知に使用",
+            phone: "電話番号", smsHelp: "SMS通知に使用", frequency: "頻度",
+            allowedIps: "許可されたIPアドレス", whitelistHelp: "機密エンドポイント用にIPを許可します。",
+            bandwidth: "帯域幅上限 (GB/月)", bandwidthHelp: "値が大きいほどデータ転送が可能。",
+            backend: "バックエンド連携", backendHelp: "変更は即時反映されます。",
+            forceSync: "今すぐ同期", lastSynced: "直近で同期しました。",
+            pauseLabel: "一時停止のスケジュール (サービスは一時停止)", pauseStart: "開始時刻", pauseEnd: "再開時刻",
+            setSchedule: "スケジュール設定", clearSchedule: "スケジュール解除", noPause: "一時停止はありません。",
+            reactivation: "再有効化", reactivate: "即時再有効化を要求", reactivateHelp: "今すぐオンラインに戻します。",
+            features: "機能の有効/無効", autoScaling: "オートスケーリング", backups: "毎日バックアップ", analytics: "高度な分析",
+            email: "メール", sms: "SMS", inApp: "アプリ内", immediate: "即時", hourly: "毎時サマリ", daily: "日次サマリ", weekly: "週次サマリ",
+            addIp: "追加", changePlan: "プラン変更", cancel: "キャンセル", save: "保存", regen: "再生成",
+          }
+        }
+      };
+    
+      function getI18n(path, lang) {
+        return path.split('.').reduce((o, k) => (o || {})[k], I18N[lang] || {});
+      }
+    
+      function applyI18n(lang) {
+        document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        window.currentLang = lang;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const path = el.getAttribute('data-i18n');
+          const val = getI18n(path, lang);
+          if (typeof val === 'string') el.textContent = val;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+          const path = el.getAttribute('data-i18n-placeholder');
+          const val = getI18n(path, lang);
+          if (typeof val === 'string') el.setAttribute('placeholder', val);
+        });
+      }
+    
+      document.addEventListener('DOMContentLoaded', function() {
+        const sel = document.getElementById('langSel');
+        let lang = localStorage.getItem('lang') || 'en';
+        if (sel) {
+          sel.value = lang;
+          sel.addEventListener('change', function() {
+            lang = sel.value;
+            localStorage.setItem('lang', lang);
+            applyI18n(lang);
+          });
+        }
+        applyI18n(lang);
+      });
+    })();
+    </script>
+</body>
+</html>

@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { getIdToken } from "@/lib/firebase";
 import type { FirebaseUser, UpdateUserData } from "@shared/schema";
+
+const API_BASE = "http://localhost:5000"; // Make sure this matches your backend
 
 interface EditUserModalProps {
   user: FirebaseUser | null;
@@ -29,7 +31,7 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
       setDisplayName(user.displayName || "");
       setEmail(user.email || "");
       setDisabled(user.disabled);
-      
+
       // Determine role from custom claims
       if (user.customClaims?.admin) {
         setRole("admin");
@@ -41,11 +43,23 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
     }
   }, [user]);
 
+  // Helper to update user via backend PATCH
+  const updateUser = async (updateData: UpdateUserData & { uid: string }) => {
+    const token = await getIdToken();
+    const res = await fetch(`${API_BASE}/api/users/${updateData.uid}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  };
+
   const updateUserMutation = useMutation({
-    mutationFn: async (updateData: UpdateUserData & { uid: string }) => {
-      const response = await apiRequest("PATCH", `/api/users/${updateData.uid}`, updateData);
-      return response.json();
-    },
+    mutationFn: updateUser,
     onSuccess: () => {
       toast({
         title: "User Updated",
@@ -108,7 +122,7 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
                 data-testid="input-display-name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="editEmail">Email</Label>
               <Input
@@ -120,7 +134,7 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
                 data-testid="input-email"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="editRole">Role</Label>
               <Select value={role} onValueChange={setRole}>
@@ -134,7 +148,7 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Switch
                 id="editDisabled"
@@ -145,7 +159,7 @@ export default function EditUserModal({ user, open, onClose }: EditUserModalProp
               <Label htmlFor="editDisabled">Account Active</Label>
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-3">
             <Button
               type="button"

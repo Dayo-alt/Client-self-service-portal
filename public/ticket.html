@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tickets.</title>
+  <link rel="stylesheet" href="layout.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <script type="text/javascript" src="invoice.js" defer></script>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #fff;
+      --muted: #6b7280;
+      --white: #2d3748;
+      --accent: #6366f1;
+      --accent-2: #7c3aed;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --shadow: 0 4px 24px rgba(60, 72, 88, 0.10);
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--white);
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 26px;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid #e5e7eb;
+    }
+
+    .title {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--accent);
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: #f7fafc;
+      color: var(--white);
+      outline: none;
+      font-size: 15px;
+      margin-bottom: 8px;
+      transition: border 0.2s, background 0.2s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    #category {
+      width: 100%;
+      background-color: #f7fafc;
+      color: var(--white);
+    }
+
+    #category option {
+      background-color: #fff;
+      color: #2d3748;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .file-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #fff;
+      margin-top: 14px;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px dashed #e2e8f0;
+      box-shadow: none;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.12);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .status-card {
+      background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1.5px solid #e0e7ef;
+    }
+
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      justify-content: space-between;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      color: var(--muted);
+      font-weight: 700;
+      border: 2px solid #e2e8f0;
+      transition: all 300ms ease;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      color: #fff;
+      transform: scale(1.06);
+      border-color: var(--accent-2);
+    }
+
+    .dot.done {
+      background: var(--success);
+      color: #fff;
+      transform: scale(1.06);
+    }
+
+    .step-label {
+      font-size: 13px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .progress-line {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      width: 0%;
+      transition: width 500ms ease;
+    }
+
+    .chat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1.5px solid #e2e8f0;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 18px;
+      min-height: 320px;
+    }
+
+    .chat-main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .messages {
+      flex: 1;
+      overflow: auto;
+      padding: 8px;
+      border-radius: 10px;
+      background: #f7fafc;
+    }
+
+    .msg {
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      max-width: 80%;
+      font-size: 14px;
+    }
+
+    .msg.user {
+      background: #e0e7ff;
+      align-self: flex-end;
+      color: var(--white);
+    }
+
+    .msg.bot {
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: #f7fafc;
+      color: var(--white);
+    }
+
+    .history {
+      background: #f7fafc;
+      border-radius: 10px;
+      padding: 12px;
+      overflow: auto;
+      max-height: 360px;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .ticket-item {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .ticket-item:hover {
+      background: #e0e7ff;
+      border-color: var(--accent);
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .toast {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #e0e7ff;
+      color: #2d3748;
+      box-shadow: var(--shadow);
+      border: 1.5px solid #c7d2fe;
+      min-width: 240px;
+      font-weight: 600;
+    }
+
+    .toast small {
+      display: block;
+      font-weight: 400;
+      color: #6366f1;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .toast-wrap {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+      transition: background 0.2s;
+    }
+
+    .file-label:hover {
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    }
+
+    .navbar .right,
+    .navbar .profile-icon {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-top: 0 !important;
+      position: static !important;
+    }
+
+    #langSel {
+      min-width: 110px;
+      height: 36px;
+      font-size: 15px;
+      margin: 0 !important;
+      vertical-align: middle;
+    }
+
+    .nav-avatar {
+      border-radius: 999px;
+      display: flex !important;
+      align-items: center !important;
+      margin-left: 0 !important;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .chat-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    footer.note {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script>
+    // Navbar avatar init for Ticket page
+    (function () {
+      try {
+        var url = localStorage.getItem('user_photo_url');
+        var email = localStorage.getItem('user_email');
+        var img = document.getElementById('navAvatar');
+        var ni = document.getElementById('navInitial');
+        if (url && img) { img.src = url; img.style.display = 'block'; if (ni) ni.style.display = 'none'; return; }
+        if (email && ni) { ni.textContent = (email.split('@')[0] || 'U').slice(0, 1).toUpperCase(); ni.style.display = 'flex'; }
+      } catch (e) { }
+    })();
+    (function ensureNavAvatar() {
+      try {
+        var url = localStorage.getItem('user_photo_url');
+        var img = document.getElementById('navAvatar');
+        if (url && img) { img.src = url; img.style.display = 'block'; return; }
+      } catch (e) { }
+      try {
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+          firebase.initializeApp({
+            apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+            authDomain: "client-self-service-portal.firebaseapp.com",
+            projectId: "client-self-service-portal",
+            storageBucket: "client-self-service-portal.appspot.com",
+            messagingSenderId: "423657022971",
+            appId: "1:423657022971:web:d58cd5730591b0e121175e",
+            measurementId: "G-EDW6QM7B76"
+          });
+        }
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+        auth.onAuthStateChanged(function (user) {
+          if (user && user.uid) {
+            db.collection('profiles').doc(user.uid).get().then(function (snap) {
+              var p = snap.data() || {};
+              if (p.photoURL) {
+                try { localStorage.setItem('user_photo_url', p.photoURL); } catch (e) { }
+                var img = document.getElementById('navAvatar');
+                if (img) { img.src = p.photoURL; img.style.display = 'block'; }
+              } else if (p.email) {
+                var ni = document.getElementById('navInitial');
+                if (ni) { ni.textContent = (p.email.split('@')[0] || 'U').slice(0, 1).toUpperCase(); ni.style.display = 'flex'; }
+              }
+            }).catch(function () { });
+          }
+        });
+      } catch (e) { }
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="left">
+      <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+    </div>
+    <div class="center links">
+      <a href="invoice.html" data-i18n="nav.home">Home</a>
+      <a href="index.html#contact" data-i18n="nav.contact">Contact Us</a>
+    </div>
+    <div class="right profile-icon">
+      <select id="langSel" aria-label="Language">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="ar">العربية</option>
+        <option value="ja">日本語</option>
+      </select>
+      <a class="nav-avatar" href="profile.html" aria-label="Profile" title="Open Profile">
+        <img id="navAvatar" alt="avatar"
+          style="width:32px;height:32px;border-radius:999px;object-fit:cover;display:block;cursor:pointer;" />
+        <span id="navInitial" class="nav-initial" style="display:none;">U</span>
+      </a>
+    </div>
+  </div>
+  <div class="sidebar modern" id="sidebar" aria-label="Sidebar">
+    <div class="sidebar-inner">
+      <nav class="nav">
+        <a href="invoice.html" class="nav-item" title="Invoice">
+          <span class="material-symbols-outlined">bar_chart_4_bars</span>
+          <span class="label" data-i18n="sidebar.invoice">Invoice</span>
+        </a>
+        <a href="ticket.html" class="nav-item" title="Ticket">
+          <span class="material-symbols-outlined">shield</span>
+          <span class="label" data-i18n="sidebar.tracking">Tracking</span>
+        </a>
+        <a href="settings.html" class="nav-item" title="Settings">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="label" data-i18n="sidebar.settings">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user">
+          <div class="avatar">b</div>
+          <div class="meta">
+            <div class="name">Client</div>
+            <button class="signout" onclick="logout()" data-i18n="auth.signOut">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page" style="background:#e74d3c00;">
+      <div class="app">
+        <!-- Left: Form -->
+        <aside class="panel">
+          <div class="title" data-i18n="ticket.title">Ticket Submission</div>
+          <div style="font-size:14px; color:var(--muted);">Raise a new support request — we'll track it and notify you.
+          </div>
+          <label for="email" data-i18n="ticket.email">Your Email</label>
+          <input id="email" type="email" placeholder="you@example.com">
+          <label for="subject" data-i18n="ticket.subject">Subject</label>
+          <input id="subject" placeholder="Short summary (e.g., Can't login)">
+          <label for="category" data-i18n="ticket.category">Category</label>
+          <select id="category">
+            <option data-i18n="ticket.cat.tech">Technical Issue</option>
+            <option data-i18n="ticket.cat.billing">Billing</option>
+            <option data-i18n="ticket.cat.onboarding">Onboarding</option>
+            <option data-i18n="ticket.cat.feature">Feature Request</option>
+            <option data-i18n="ticket.cat.other">Other</option>
+          </select>
+          <label for="desc" data-i18n="ticket.description">Description</label>
+          <textarea id="desc" data-i18n-placeholder="ticket.descPh"></textarea>
+          <label data-i18n="ticket.attach">Attach file</label>
+          <div class="file-row">
+            <label for="file" class="file-label" data-i18n="ticket.chooseFile">Choose File</label>
+            <input id="file" type="file" accept=".png,.jpg,.jpeg,.pdf,.txt,.log">
+            <button id="attachRemove" class="btn ghost" style="padding:8px 10px;"
+              data-i18n="ticket.remove">Remove</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:14px;">
+            <button class="btn" id="submitTicket" data-i18n="ticket.submit">Submit Ticket</button>
+            <button id="startDemo" class="btn ghost" data-i18n="ticket.demo">Start Auto Demo</button>
+          </div>
+          <div style="margin-top:16px; font-size:13px; color:var(--muted);">
+            <strong>Quick controls:</strong> Submit to create a ticket; click any ticket in History to view it on the
+            right.
+          </div>
+        </aside>
+        <!-- Right: status + chat/history -->
+        <section class="right">
+          <div class="status-card panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-weight:700; font-size:15px;">Status Tracker</div>
+              <div style="font-size:13px; color:var(--muted);">Real-time updates</div>
+            </div>
+            <div class="steps" id="stepsRow">
+              <!-- steps are generated via JS -->
+            </div>
+            <div class="progress-line" aria-hidden>
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+          <div class="chat-card panel">
+            <div class="chat-main">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:700;" data-i18n="ticket.conversation">Conversation Thread</div>
+                <div style="font-size:12px; color:var(--muted);">Clients & support team chat in one place</div>
+              </div>
+              <div class="messages" id="messages">
+                <div style="color:var(--muted); font-size:13px; padding:10px; text-align:center;"
+                  data-i18n="ticket.noTickets">No tickets yet — submit one on the left.</div>
+              </div>
+              <div class="chat-input">
+                <input id="chatInput" data-i18n-placeholder="ticket.chatPh" autocomplete="off">
+                <button id="sendMsg" class="btn ghost" data-i18n="ticket.send">Send</button>
+              </div>
+            </div>
+            <aside style="display:flex; flex-direction:column;">
+              <div style="font-weight:700; margin-bottom:8px;" data-i18n="ticket.history">Ticket History</div>
+              <div class="history" id="historyList">
+                <div style="color:var(--muted); font-size:13px;">No tickets yet — submit one on the left.</div>
+              </div>
+            </aside>
+          </div>
+          <footer class="panel note" style="background:transparent; box-shadow:none; border:none;">
+            Tip: click a ticket in History to focus it. You can also remove attachments after selecting.
+          </footer>
+        </section>
+      </div>
+      <div class="toast-wrap" id="toasts"></div>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+      authDomain: "client-self-service-portal.firebaseapp.com",
+      projectId: "client-self-service-portal",
+      storageBucket: "client-self-service-portal.firebasestorage.app",
+      messagingSenderId: "423657022971",
+      appId: "1:423657022971:web:d58cd5730591b0e121175e"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    (function () {
+      let tickets = [];
+      const statuses = ["Opened", "In Progress", "Awaiting Technical Support", "Resolved"];
+      const stepsRow = document.getElementById('stepsRow');
+      const progressFill = document.getElementById('progressFill');
+      const historyList = document.getElementById('historyList');
+      const messagesBox = document.getElementById('messages');
+      const toasts = document.getElementById('toasts');
+      const emailInput = document.getElementById('email');
+      function renderSteps(activeIndex = 0) {
+        stepsRow.innerHTML = '';
+        statuses.forEach((s, i) => {
+          const step = document.createElement('div');
+          step.className = 'step';
+          step.innerHTML = `<div class="dot ${i < activeIndex ? 'done' : (i === activeIndex ? 'active' : '')}">${i + 1}</div><div class="step-label">${s}</div>`;
+          stepsRow.appendChild(step);
+        });
+        const fillPercent = (activeIndex / (statuses.length - 1)) * 100;
+        progressFill.style.width = fillPercent + '%';
+      }
+      renderSteps(0);
+      function showToast(title, desc, ttl = 4500) {
+        try {
+          const raw = localStorage.getItem('svc-settings-state');
+          if (raw) {
+            const st = JSON.parse(raw);
+            if (st && st.notifications && st.notifications.inApp === false) return;
+          }
+        } catch (e) { }
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerHTML = `<div>${title}</div><small>${desc || ''}</small>`;
+        toasts.appendChild(t);
+        setTimeout(() => t.style.opacity = '0.01', ttl - 400);
+        setTimeout(() => t.remove(), ttl);
+      }
+      function refreshHistory() {
+        historyList.innerHTML = '';
+        if (tickets.length === 0) {
+          historyList.innerHTML = '<div style="color:var(--muted); font-size:13px;">No tickets yet — submit one on the left.</div>';
+          return;
+        }
+        tickets.slice().reverse().forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'ticket-item';
+          el.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-weight:700;">${escapeHtml(t.subject || '(No subject)')}</div>
+              <div style="font-size:12px; color:${statusColor(t.statusIndex)}; font-weight:700;">${statuses[t.statusIndex]}</div>
+            </div>
+            <div class="meta">${escapeHtml(t.category)} • ${t.fileName ? ('Attachment: ' + escapeHtml(t.fileName)) : ''}</div>
+            <div style="font-size:13px; color:var(--muted); margin-top:6px;">${escapeHtml(truncate(t.desc, 90))}</div>
+          `;
+          el.onclick = () => selectTicket(t.id);
+          historyList.appendChild(el);
+        });
+      }
+      let currentTicketId = null;
+      let unsubscribeTicket = null;
+      let unsubscribeMessages = null;
+      function selectTicket(id) {
+        currentTicketId = id;
+        const t = tickets.find(x => x.id === id);
+        if (!t) return;
+        renderSteps(t.statusIndex);
+        messagesBox.innerHTML = `<div style="color:var(--muted); padding:12px;">Loading conversation…</div>`;
+        if (unsubscribeTicket) { unsubscribeTicket(); unsubscribeTicket = null; }
+        if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+        const tRef = doc(db, 'tickets', id);
+        unsubscribeTicket = onSnapshot(tRef, (snap) => {
+          const data = snap.data();
+          if (!data) return;
+          const idx = tickets.findIndex(tt => tt.id === id);
+          if (idx >= 0) tickets[idx] = { ...tickets[idx], ...data };
+          renderSteps(data.statusIndex ?? 0);
+          refreshHistory();
+        });
+        const mRef = query(collection(db, 'tickets', id, 'messages'), orderBy('ts', 'asc'));
+        unsubscribeMessages = onSnapshot(mRef, (qs) => {
+          const msgs = [];
+          qs.forEach(ms => msgs.push(ms.data()));
+          renderMessagesArray(msgs);
+        });
+      }
+      function renderMessagesArray(msgs) {
+        messagesBox.innerHTML = '';
+        if (!msgs || msgs.length === 0) {
+          messagesBox.innerHTML = `<div style="color:var(--muted); padding:12px;">No conversation yet — say hi.</div>`;
+          return;
+        }
+        msgs.forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'msg ' + (m.from === 'user' ? 'user' : 'bot');
+          div.textContent = m.msg;
+          messagesBox.appendChild(div);
+        });
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+      }
+      function statusColor(idx) {
+        if (idx === 0) return '#7fb77f';
+        if (idx === 1) return '#ffd36e';
+        if (idx === 2) return '#e08b6c';
+        return '#8aa999';
+      }
+      function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+      function truncate(s, n) { if (!s) return ''; return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+      document.getElementById('submitTicket').addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const sub = document.getElementById('subject').value.trim();
+        const cat = document.getElementById('category').value;
+        const desc = document.getElementById('desc').value.trim();
+        const fileIn = document.getElementById('file');
+        const fileName = fileIn.files && fileIn.files.length ? fileIn.files[0].name : '';
+        if (!email) {
+          showToast('Email required', 'Please enter your email to submit a ticket.', 3500);
+          return;
+        }
+        try {
+          const docRef = await addDoc(collection(db, 'tickets'), {
+            email,
+            subject: sub || '(No subject)',
+            category: cat,
+            desc,
+            fileName,
+            statusIndex: 0,
+            createdAt: serverTimestamp()
+          });
+          await addDoc(collection(db, 'tickets', docRef.id, 'messages'), {
+            from: 'bot',
+            msg: 'Thank you Sir/Ma — your ticket is received. We will start processing it shortly.',
+            ts: serverTimestamp()
+          });
+          showToast('Ticket submitted', `Subject: ${truncate(sub, 40)}`, 4000);
+          if (!unsubscribeUserTickets) subscribeToUserTickets(email);
+        } catch (err) {
+          console.error('Error submitting ticket: ', err);
+          showToast('Error', 'Could not submit ticket. Check console.', 4000);
+        }
+      });
+      document.getElementById('attachRemove').addEventListener('click', () => {
+        const fileIn = document.getElementById('file');
+        fileIn.value = null;
+        showToast('Attachment removed', 'No file attached', 2000);
+      });
+      document.getElementById('startDemo').addEventListener('click', () => {
+        document.getElementById('subject').value = 'Demo: App crash on launch';
+        document.getElementById('desc').value = 'When I open the app it immediately crashes with code 0x0.';
+        document.getElementById('category').value = 'Technical Issue';
+        document.getElementById('file').value = null;
+        document.getElementById('submitTicket').click();
+      });
+      document.getElementById('sendMsg').addEventListener('click', sendChat);
+      document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+      async function sendChat() {
+        const txt = document.getElementById('chatInput').value.trim();
+        if (!txt || !currentTicketId) {
+          if (!currentTicketId) showToast('No ticket selected', 'Click a ticket from History or submit a new one', 3000);
+          return;
+        }
+        try {
+          await addDoc(collection(db, 'tickets', currentTicketId, 'messages'), {
+            from: 'user',
+            msg: txt,
+            ts: serverTimestamp()
+          });
+          document.getElementById('chatInput').value = '';
+        } catch (e) {
+          console.error(e);
+          showToast('Error', 'Failed to send message', 3000);
+        }
+      }
+      let unsubscribeUserTickets = null;
+      function subscribeToUserTickets(email) {
+        if (unsubscribeUserTickets) { unsubscribeUserTickets(); unsubscribeUserTickets = null; }
+        const q = query(collection(db, 'tickets'), where('email', '==', email));
+        unsubscribeUserTickets = onSnapshot(q, (qs) => {
+          tickets = qs.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => {
+              const at = a.createdAt?.toMillis?.() || 0;
+              const bt = b.createdAt?.toMillis?.() || 0;
+              return bt - at;
+            });
+          refreshHistory();
+          if (tickets.length && !currentTicketId) selectTicket(tickets[0].id);
+        });
+      }
+      emailInput.addEventListener('change', () => {
+        const email = emailInput.value.trim();
+        if (email) subscribeToUserTickets(email);
+      });
+      refreshHistory();
+      window._tickets = tickets;
+      window.addEventListener('beforeunload', () => {
+        tickets.forEach(t => t.autoTimers && t.autoTimers.forEach(x => clearTimeout(x)));
+      });
+    })();
+  </script>
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById("sidebar");
+      const content = document.querySelector(".content");
+      const isClosed = sb.classList.toggle("closed");
+      content.classList.toggle("full");
+      try { localStorage.setItem("sb_closed", isClosed ? "1" : "0"); } catch (e) { }
+    }
+    function logout() { window.location.href = "user-login.html"; }
+    (function initSidebarAndActive() {
+      try {
+        if (localStorage.getItem("sb_closed") === "1") {
+          document.getElementById("sidebar").classList.add("closed");
+          const c = document.querySelector(".content");
+          c && c.classList.add("full");
+        }
+      } catch (e) { }
+      try {
+        var path = (location.pathname || '').toLowerCase();
+        var file = path.split('/').pop() || 'ticket.html';
+        document.querySelectorAll('.sidebar .nav-item').forEach(function (a) {
+          var href = (a.getAttribute('href') || '').toLowerCase();
+          if (href === file) a.classList.add('active');
+          else a.classList.remove('active');
+        });
+      } catch (e) { }
+      try {
+        document.querySelectorAll('.sidebar .nav-item').forEach(function (a) {
+          a.addEventListener('click', function () {
+            if (window.matchMedia('(max-width: 900px)').matches) {
+              const sb = document.getElementById('sidebar');
+              const c = document.querySelector('.content');
+              sb.classList.add('closed');
+              c && c.classList.add('full');
+              try { localStorage.setItem('sb_closed', '1'); } catch (e) { }
+            }
+          });
+        });
+      } catch (e) { }
+    })();
+  </script>
+<script>
+  (function () {
+    const I18N = {
+      en: {
+        nav: { home: "Home", contact: "Contact Us" },
+        sidebar: { invoice: "Invoice", tracking: "Tracking", settings: "Settings" },
+        auth: { signOut: "Sign out" },
+        ticket: {
+          title: "Ticket Submission",
+          email: "Your Email",
+          subject: "Subject",
+          category: "Category",
+          description: "Description",
+          attach: "Attach file",
+          chooseFile: "Choose File",
+          remove: "Remove",
+          submit: "Submit Ticket",
+          demo: "Start Auto Demo",
+          conversation: "Conversation Thread",
+          noTickets: "No tickets yet — submit one on the left.",
+          history: "Ticket History",
+          send: "Send",
+          descPh: "Explain the problem with steps to reproduce (optional)",
+          chatPh: "Type a message to support...",
+          cat: { tech: "Technical Issue", billing: "Billing", onboarding: "Onboarding", feature: "Feature Request", other: "Other" }
+        }
+      },
+      fr: {
+        nav: { home: "Accueil", contact: "Nous contacter" },
+        sidebar: { invoice: "Facture", tracking: "Suivi", settings: "Paramètres" },
+        auth: { signOut: "Se déconnecter" },
+        ticket: {
+          title: "Soumission de ticket",
+          email: "Votre e-mail",
+          subject: "Sujet",
+          category: "Catégorie",
+          description: "Description",
+          attach: "Joindre un fichier",
+          chooseFile: "Choisir un fichier",
+          remove: "Retirer",
+          submit: "Soumettre le ticket",
+          demo: "Démarrer la démo",
+          conversation: "Fil de conversation",
+          noTickets: "Pas encore de tickets — soumettez-en un à gauche.",
+          history: "Historique des tickets",
+          send: "Envoyer",
+          descPh: "Expliquez le problème avec étapes de reproduction (facultatif)",
+          chatPh: "Message au support...",
+          cat: { tech: "Problème technique", billing: "Facturation", onboarding: "Onboarding", feature: "Demande de fonctionnalité", other: "Autre" }
+        }
+      },
+      es: {
+        nav: { home: "Inicio", contact: "Contáctanos" },
+        sidebar: { invoice: "Factura", tracking: "Seguimiento", settings: "Configuración" },
+        auth: { signOut: "Cerrar sesión" },
+        ticket: {
+          title: "Envío de ticket",
+          email: "Tu correo",
+          subject: "Asunto",
+          category: "Categoría",
+          description: "Descripción",
+          attach: "Adjuntar archivo",
+          chooseFile: "Elegir archivo",
+          remove: "Quitar",
+          submit: "Enviar ticket",
+          demo: "Iniciar demo",
+          conversation: "Conversación",
+          noTickets: "Sin tickets — envía uno a la izquierda.",
+          history: "Historial de tickets",
+          send: "Enviar",
+          descPh: "Explica el problema con pasos para reproducir (opcional)",
+          chatPh: "Escribe un mensaje al soporte...",
+          cat: { tech: "Problema técnico", billing: "Facturación", onboarding: "Onboarding", feature: "Solicitud de función", other: "Otro" }
+        }
+      },
+      de: {
+        nav: { home: "Startseite", contact: "Kontakt" },
+        sidebar: { invoice: "Rechnung", tracking: "Verfolgung", settings: "Einstellungen" },
+        auth: { signOut: "Abmelden" },
+        ticket: {
+          title: "Ticket einreichen",
+          email: "Ihre E‑Mail",
+          subject: "Betreff",
+          category: "Kategorie",
+          description: "Beschreibung",
+          attach: "Datei anhängen",
+          chooseFile: "Datei wählen",
+          remove: "Entfernen",
+          submit: "Ticket senden",
+          demo: "Demo starten",
+          conversation: "Konversation",
+          noTickets: "Noch keine Tickets — links eins einreichen.",
+          history: "Ticketverlauf",
+          send: "Senden",
+          descPh: "Beschreiben Sie das Problem mit Schritten zur Reproduktion (optional)",
+          chatPh: "Nachricht an den Support...",
+          cat: { tech: "Technisches Problem", billing: "Abrechnung", onboarding: "Onboarding", feature: "Funktionsanfrage", other: "Sonstiges" }
+        }
+      },
+      ar: {
+        nav: { home: "الرئيسية", contact: "اتصل بنا" },
+        sidebar: { invoice: "الفواتير", tracking: "التذاكر", settings: "الإعدادات" },
+        auth: { signOut: "تسجيل الخروج" },
+        ticket: {
+          title: "إرسال تذكرة",
+          email: "بريدك الإلكتروني",
+          subject: "الموضوع",
+          category: "الفئة",
+          description: "الوصف",
+          attach: "إرفاق ملف",
+          chooseFile: "اختر ملفًا",
+          remove: "إزالة",
+          submit: "إرسال التذكرة",
+          demo: "بدء العرض التوضيحي",
+          conversation: "سجل المحادثة",
+          noTickets: "لا توجد تذاكر — أرسل تذكرة من اليسار.",
+          history: "سجل التذاكر",
+          send: "إرسال",
+          descPh: "اشرح المشكلة مع خطوات لإعادة الإنتاج (اختياري)",
+          chatPh: "اكتب رسالة للدعم...",
+          cat: { tech: "مشكلة تقنية", billing: "الفواتير", onboarding: "الانضمام", feature: "طلب ميزة", other: "أخرى" }
+        }
+      },
+      ja: {
+        nav: { home: "ホーム", contact: "お問い合わせ" },
+        sidebar: { invoice: "請求書", tracking: "チケット", settings: "設定" },
+        auth: { signOut: "サインアウト" },
+        ticket: {
+          title: "チケット送信",
+          email: "メールアドレス",
+          subject: "件名",
+          category: "カテゴリ",
+          description: "詳細",
+          attach: "ファイル添付",
+          chooseFile: "ファイルを選択",
+          remove: "削除",
+          submit: "チケット送信",
+          demo: "デモ開始",
+          conversation: "会話",
+          noTickets: "チケットはまだありません — 左から送信してください。",
+          history: "チケット履歴",
+          send: "送信",
+          descPh: "問題の再現手順を含めて説明（任意）",
+          chatPh: "サポートへのメッセージを入力...",
+          cat: { tech: "技術的な問題", billing: "請求", onboarding: "オンボーディング", feature: "機能要望", other: "その他" }
+        }
+      }
+    };
+  
+    function getI18n(path, lang) {
+      return path.split('.').reduce((o, k) => (o || {})[k], I18N[lang] || {});
+    }
+  
+    function applyI18n(lang) {
+      document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+      window.currentLang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const path = el.getAttribute('data-i18n');
+        const val = getI18n(path, lang);
+        if (typeof val === 'string') el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const path = el.getAttribute('data-i18n-placeholder');
+        const val = getI18n(path, lang);
+        if (typeof val === 'string') el.setAttribute('placeholder', val);
+      });
+    }
+  
+    document.addEventListener('DOMContentLoaded', function () {
+      const sel = document.getElementById('langSel');
+      let lang = localStorage.getItem('lang') || 'en';
+      if (sel) {
+        sel.value = lang;
+        sel.addEventListener('change', function () {
+          lang = sel.value;
+          localStorage.setItem('lang', lang);
+          applyI18n(lang);
+        });
+      }
+      applyI18n(lang);
+    });
+  })();
+  </script>
+</body>
+
+</html>

@@ -1,6 +1,16 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getIdToken } from "./firebase";
 
+const API_BASE = (import.meta as any)?.env?.VITE_API_BASE || "http://localhost:5000";
+
+function resolveUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  // Ensure single slash join: API_BASE + url
+  const base = API_BASE.replace(/\/$/, "");
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${base}${path}`;
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -27,11 +37,11 @@ export async function apiRequest(
     console.warn("Could not get Firebase ID token:", error);
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(resolveUrl(url), {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    // No cookies needed; omit credentials to simplify CORS
   });
 
   await throwIfResNotOk(res);
@@ -54,9 +64,9 @@ export const getQueryFn: <T>(options: {
       console.warn("Could not get Firebase ID token:", error);
     }
 
-    const res = await fetch(queryKey.join("/") as string, {
+    const res = await fetch(resolveUrl(queryKey.join("/") as string), {
       headers,
-      credentials: "include",
+      // No cookies needed; omit credentials to simplify CORS
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

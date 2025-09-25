@@ -1,0 +1,118 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  background: #f7f8fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  padding: 16px; /* Add this line */
+}
+
+.main_container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(60, 72, 88, 0.10), 0 1.5px 6px rgba(60, 72, 88, 0.08);
+  padding: 48px 32px 32px 32px;
+  width: 100%;
+  max-width: 400px;
+  margin: 32px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.main_container h1 {
+  color: #2d3748;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+label {
+  display: block;
+  color: #4a5568;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #2d3748;
+  font-size: 1rem;
+  transition: border 0.2s;
+  margin-bottom: 14px;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+  border-color: #7c3aed;
+  outline: none;
+  background: #fff;
+}
+
+.submit {
+  width: 100%;
+  padding: 12px 0;
+  background: linear-gradient(90deg, #7c3aed 0%, #6366f1 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.submit:hover {
+  background: linear-gradient(90deg, #6366f1 0%, #7c3aed 100%);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.12);
+}
+
+p {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.98rem;
+}
+
+p a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+p a:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+#error-message {
+  color: #e53e3e;
+  font-size: 0.98rem;
+  margin-bottom: 10px;
+  text-align: center;
+  min-height: 1.2em;
+}
+@media (max-width: 480px) {
+  .main_container {
+    padding: 24px 8px 16px 8px;
+    max-width: 98vw;
+  }
+}

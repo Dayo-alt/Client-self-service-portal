@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+</head>
+<body>
+  <style>
+    .backdrop { position: fixed; inset: 0; background: rgba(17,24,39,.42); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .modal { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 12px 32px rgba(0,0,0,.16); width: 360px; max-width: calc(100vw - 40px); }
+    .modal .h { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; font-weight: 700; }
+    .modal .b { padding: 16px; }
+    .modal input { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; outline: none; background: #f7fafc; }
+    .inline { display: flex; align-items: center; }
+    .btn.small { padding: 8px 10px; font-size: 13px; border-radius: 10px; }
+    .btn.ghost { background: transparent; color: #6b7280; border: 1.5px dashed #e2e8f0; box-shadow: none; }
+  </style>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="left">
+      <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+    </div>
+    <div class="center links">
+      <a href="invoice.html">Home</a>
+      <a href="index.html#contact">Contact Us</a>
+    </div>
+    <div class="right profile-icon">
+      <img id="navAvatar" alt="avatar" style="width:32px;height:32px;border-radius:999px;object-fit:cover;display:none;" />
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar modern" id="sidebar" aria-label="Sidebar">
+    <div class="sidebar-inner">
+      <nav class="nav">
+        <a href="invoice.html" class="nav-item" title="Invoice">
+          <span class="material-symbols-outlined">bar_chart_4_bars</span>
+          <span class="label">Invoice</span>
+        </a>
+        <a href="ticket.html" class="nav-item" title="Ticket">
+          <span class="material-symbols-outlined">shield</span>
+          <span class="label">Tracking</span>
+        </a>
+        <a href="settings.html" class="nav-item" title="Settings">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="label">Settings</span>
+        </a>
+        <!-- <a href="profile.html" class="nav-item" title="Profile">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span class="label">Profile</span>
+        </a>
+      </nav> -->
+      <div class="sidebar-footer">
+        <div class="user">
+          <div class="avatar" id="avatarInitial">b</div>
+          <div class="meta">
+            <div class="name" id="displayNameSmall">Client</div>
+            <button class="signout" onclick="logout()">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="pag">
+      <div class="dashboard-card" style="max-width: 1040px; margin: 0 auto;">
+        <div style="display:flex; gap:26px; align-items:flex-start;">
+          <!-- Avatar block -->
+          <div style="flex:0 0 160px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div id="avatarPreview" style="width:140px; height:140px; border-radius:999px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-size:56px; color:#374151; font-weight:700; overflow:hidden;">
+              <span id="avatarLetter">B</span>
+            </div>
+            <input id="avatarInput" type="file" accept="image/*" style="display:none;" />
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <label for="avatarInput" class="btn small" style="cursor:pointer;">Upload</label>
+              <button type="button" id="saveAvatar" class="btn small" disabled>Save</button>
+              <button type="button" id="removeAvatar" class="btn small ghost">Remove</button>
+              <button type="button" id="syncAvatar" class="btn small">Sync to Cloud</button>
+              <small id="authHint" style="color:#6b7280;">Sign in to save</small>
+              <small id="saveStatus" style="color:#6b7280; display:none;">Saving...</small>
+            </div>
+          </div>
+
+          <!-- Middle: Welcome + email/password rows -->
+          <div style="flex:1; min-width:280px;">
+            <h2 style="margin:0 0 10px 0; color:#2d3748; font-weight:800;">Welcome <span id="welcomeName">User</span>.</h2>
+            <div style="color:#6b7280; margin-bottom:14px;"></div>
+
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                  <div style="font-size:13px; color:#6b7280;">USER</div>
+                  <div id="emailValue" style="font-weight:700;">example@gmail.com</div>
+                </div>
+                <button type="button" id="openEmailModal" class="btn small ghost" style="margin:0;">Edit</button>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:13px; color:#6b7280;">PASSWORD</div>
+                  <div style="font-weight:700; letter-spacing:3px;">*****</div>
+                </div>
+                <button type="button" id="openPasswordModal" class="btn small">Change</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: placeholder panel (for future content)
+          <div style="flex:0 0 360px; height:180px; border:2px solid #c08457; border-radius:10px; background:#fff9f3;"></div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Modal -->
+  <div class="backdrop" id="emailModalBg" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal">
+      <div class="h">Change Email</div>
+      <div class="b">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <label>Current Password</label>
+          <input id="emailCurrentPwd" type="password" placeholder="Enter current password" />
+          <label>New Email</label>
+          <input id="emailNew" type="email" placeholder="name@example.com" />
+          <div class="help" style="color:#6b7280; font-size:12px;">We will send a verification link to the new email. The change completes after you click that link.</div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn ghost" id="cancelEmail">Cancel</button>
+          <button class="btn" id="saveEmail">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div class="backdrop" id="pwdModalBg" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal">
+      <div class="h">Change Password</div>
+      <div class="b">
+        <label>Current Password</label>
+        <input type="password" id="pwdCurrent" placeholder="Enter current password" />
+        <label style="margin-top:10px;">New Password</label>
+        <input type="password" id="pwdNew" placeholder="Enter new password" />
+        <div class="inline" style="justify-content:flex-end; gap:8px; margin-top:12px;">
+          <button class="btn small ghost" id="cancelPwd">Cancel</button>
+          <button class="btn small" id="savePwd">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar');
+      const content = document.querySelector('.content');
+      const isClosed = sb.classList.toggle('closed');
+      content.classList.toggle('full');
+      try { localStorage.setItem('sb_closed', isClosed ? '1' : '0'); } catch(e){}
+    }
+    function logout(){ window.location.href = 'user-login.html'; }
+
+    // Tiny toast helper
+    function toast(title, desc=''){
+      const t = document.createElement('div');
+      t.className='toast';
+      t.style.position='fixed'; t.style.top='18px'; t.style.right='18px'; t.style.zIndex='9999';
+      t.style.padding='12px 14px'; t.style.borderRadius='10px'; t.style.background='#e0e7ff'; t.style.border='1.5px solid #c7d2fe';
+      t.style.boxShadow='0 4px 24px rgba(60,72,88,0.10)';
+      t.innerHTML = `<div style="font-weight:800;color:#2d3748;">${title}</div>${desc?`<small style="color:#6366f1;">${desc}</small>`:''}`;
+      document.body.appendChild(t); setTimeout(()=>{ t.style.opacity='0.02'; }, 3200); setTimeout(()=> t.remove(), 3550);
+    }
+
+    // Init: restore sidebar state, set active
+    (function init(){
+      try {
+        if (localStorage.getItem('sb_closed') === '1') {
+          document.getElementById('sidebar').classList.add('closed');
+          const c = document.querySelector('.content'); c && c.classList.add('full');
+        }
+      } catch(e){}
+      try {
+        var path = (location.pathname||'').toLowerCase();
+        var file = path.split('/').pop() || 'profile.html';
+        document.querySelectorAll('.sidebar .nav-item').forEach(function(a){
+          var href = (a.getAttribute('href')||'').toLowerCase();
+          if (href === file) a.classList.add('active'); else a.classList.remove('active');
+        });
+        // Mobile auto-close on nav click
+        document.querySelectorAll('.sidebar .nav-item').forEach(function(a){
+          a.addEventListener('click', function(){
+            if (window.matchMedia('(max-width: 900px)').matches) {
+              const sb = document.getElementById('sidebar');
+              const c = document.querySelector('.content');
+              sb.classList.add('closed'); c && c.classList.add('full');
+              try { localStorage.setItem('sb_closed','1'); } catch(e){}
+            }
+          });
+        });
+      } catch(e){}
+
+      // Load profile bits from localStorage (for fallback only)
+      try {
+        const url = localStorage.getItem('user_photo_url');
+        if (url) { setAvatarPreview(url); const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.src = url; navImg.style.display='block'; } }
+        else { // try IndexedDB
+          loadAvatarLocal().then(u=>{ if (u) { setAvatarPreview(u); const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.src = u; navImg.style.display='block'; } } }).catch(()=>{});
+        }
+        const email = localStorage.getItem('user_email');
+        if (email) {
+          const name = (email.split('@')[0]||'User');
+          const w = document.getElementById('welcomeName');
+          if (w) w.textContent = name;
+          const ev = document.getElementById('emailValue');
+          if (ev) ev.textContent = email;
+        }
+      } catch(e){}
+
+      // Navbar avatar from localStorage
+      try {
+        const url = localStorage.getItem('user_photo_url');
+        const navImg = document.getElementById('navAvatar');
+        const navFallback = document.getElementById('navAvatarFallback');
+        if (url) { navImg.src = url; navImg.style.display='block'; navFallback.style.display='none'; }
+      } catch(e){}
+    })();
+
+    function setAvatarPreview(url){
+      const wrap = document.getElementById('avatarPreview');
+      wrap.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'avatar';
+      img.style.width = '100%'; img.style.height='100%'; img.style.objectFit='cover';
+      wrap.appendChild(img);
+    }
+
+    const _avatarInputEl = document.getElementById('avatarInput');
+    if (_avatarInputEl) _avatarInputEl.addEventListener('change', function(){
+      const f = this.files && this.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = function(e){ setAvatarPreview(String(e.target.result)); };
+      reader.readAsDataURL(f);
+    });
+
+    // Small helpers
+    function dataURLToBlob(dataUrl){
+      const arr = dataUrl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length; const u8 = new Uint8Array(n);
+      while(n--){ u8[n] = bstr.charCodeAt(n); }
+      return new Blob([u8], {type:mime});
+    }
+
+    // -------- Local avatar persistence (IndexedDB + localStorage) --------
+    const LOCAL_AVATAR_DB = 'avatars_db_v1';
+    function userKey() {
+      const uid = (auth && auth.currentUser && auth.currentUser.uid) || localStorage.getItem('user_uid');
+      const email = localStorage.getItem('user_email');
+      return uid || email || 'guest';
+    }
+    async function saveAvatarLocal(dataUrl) {
+      // Always set localStorage immediately
+      try { localStorage.setItem('user_photo_url', dataUrl); } catch(e){}
+      // Then try IndexedDB if available
+      try {
+        if (typeof idbKeyval !== 'undefined') {
+          const key = `avatar_${userKey()}`;
+          await idbKeyval.set(key, dataUrl);
+        }
+      } catch(e) { /* ignore */ }
+    }
+    async function loadAvatarLocal() {
+      // Prefer localStorage first
+      try {
+        const ls = localStorage.getItem('user_photo_url');
+        if (ls) return ls;
+      } catch(e){}
+      // Then try IndexedDB if available
+      try {
+        if (typeof idbKeyval !== 'undefined') {
+          const key = `avatar_${userKey()}`;
+          const v = await idbKeyval.get(key);
+          return v || null;
+        }
+      } catch(e){}
+      return null;
+    }
+    async function removeAvatarLocal(){
+      try {
+        const key = `avatar_${userKey()}`;
+        await idbKeyval.del(key);
+      } catch(e){}
+      try { localStorage.removeItem('user_photo_url'); } catch(e){}
+    }
+
+    // Save avatar to Firebase Storage (compat) and Firestore
+    // Firebase SDK compat load
+  </script>
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <!-- Lightweight IndexedDB helper -->
+  <script src="https://unpkg.com/idb-keyval@6/dist/idb-keyval.iife.min.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+      authDomain: "client-self-service-portal.firebaseapp.com",
+      projectId: "client-self-service-portal",
+      storageBucket: "client-self-service-portal.appspot.com",
+      messagingSenderId: "423657022971",
+      appId: "1:423657022971:web:d58cd5730591b0e121175e",
+      measurementId: "G-EDW6QM7B76"
+    };
+    let USER_DOC_ID = 'dayo123';
+    try { firebase.initializeApp(firebaseConfig); } catch(e){}
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const auth = firebase.auth();
+
+    // Determine current user and load their profile
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (user && user.uid) {
+          USER_DOC_ID = user.uid;
+          try { localStorage.setItem('user_uid', USER_DOC_ID); } catch(e){}
+          // welcome + email values
+          if (user.email) {
+            const name = (user.email.split('@')[0]||'User');
+            const w = document.getElementById('welcomeName');
+            if (w) w.textContent = name;
+            const ev = document.getElementById('emailValue');
+            if (ev) ev.textContent = user.email;
+            try { localStorage.setItem('user_email', user.email); } catch(e){}
+          }
+          // Load Firestore profile
+          const snap = await db.collection('profiles').doc(USER_DOC_ID).get();
+          if (snap.exists) {
+            const p = snap.data() || {};
+            if (p.email) {
+              const ev = document.getElementById('emailValue');
+              if (ev) ev.textContent = p.email;
+              const name = (p.email.split('@')[0]||'User');
+              const w = document.getElementById('welcomeName');
+              if (w) w.textContent = name;
+              try { localStorage.setItem('user_email', p.email); } catch(e){}
+            }
+            if (p.photoURL) {
+              setAvatarPreview(p.photoURL);
+              try { localStorage.setItem('user_photo_url', p.photoURL); } catch(e){}
+              const navImg = document.getElementById('navAvatar');
+              if (navImg) { navImg.src = p.photoURL; navImg.style.display='block'; }
+            } else {
+              // fallback to local avatar if present
+              loadAvatarLocal().then(u=>{
+                if (u) {
+                  setAvatarPreview(u);
+                  const navImg = document.getElementById('navAvatar');
+                  if (navImg) { navImg.src = u; navImg.style.display='block'; }
+                }
+              }).catch(()=>{});
+            }
+          }
+        } else {
+          // Not signed in: fall back to any saved local profile
+          const url = localStorage.getItem('user_photo_url');
+          const navImg = document.getElementById('navAvatar');
+          const navFallback = document.getElementById('navAvatarFallback');
+          if (url && navImg && navFallback) { navImg.src = url; navImg.style.display='block'; navFallback.style.display='none'; }
+          const email = localStorage.getItem('user_email');
+          if (email) {
+            const name = (email.split('@')[0]||'User');
+            const w = document.getElementById('welcomeName');
+            if (w) w.textContent = name;
+            const ev = document.getElementById('emailValue');
+            if (ev) ev.textContent = email;
+          }
+        }
+      } catch (e) { /* noop */ }
+    });
+
+    async function uploadAvatarAndSave() {
+      const file = document.getElementById('avatarInput').files?.[0];
+      if (!file) { toast('No file selected'); return; }
+      const statusEl = document.getElementById('saveStatus');
+      const saveBtn = document.getElementById('saveAvatar');
+      if (statusEl) statusEl.style.display = 'inline';
+      if (saveBtn) saveBtn.disabled = true;
+      // Always keep a local copy so the avatar persists on this browser
+      const localDataUrl = await new Promise((res)=>{ const r=new FileReader(); r.onload=e=>res(String(e.target.result)); r.readAsDataURL(file); });
+
+      if (auth.currentUser && auth.currentUser.uid) {
+        // Try cloud first when signed in
+        const path = `avatars/${USER_DOC_ID}/${Date.now()}_${file.name}`;
+        const ref = storage.ref().child(path);
+        try {
+          await ref.put(file);
+          const url = await ref.getDownloadURL();
+          await db.collection('profiles').doc(USER_DOC_ID).set({ photoURL: url }, { merge: true });
+          localStorage.setItem('user_photo_url', url);
+          const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.src = url; navImg.style.display='block'; }
+          setAvatarPreview(url);
+          toast('Avatar saved');
+          // also keep a local mirror for offline-first UX
+          await saveAvatarLocal(url);
+          if (statusEl) statusEl.style.display = 'none';
+          if (saveBtn) saveBtn.disabled = false;
+          return;
+        } catch (e) {
+          console.warn('Cloud upload failed, falling back to local avatar', e);
+          // Fall back to local persistence
+        }
+      }
+
+      // Local-only persistence path
+      await saveAvatarLocal(localDataUrl);
+      const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.src = localDataUrl; navImg.style.display='block'; }
+      setAvatarPreview(localDataUrl);
+      toast('Avatar saved locally');
+      if (statusEl) statusEl.style.display = 'none';
+      if (saveBtn) saveBtn.disabled = false;
+    }
+    const _saveBtnEl = document.getElementById('saveAvatar');
+    if (_saveBtnEl) _saveBtnEl.addEventListener('click', ()=>{
+      uploadAvatarAndSave().catch(e=> { console.error(e); toast('Avatar save failed', e.message||'Error'); });
+    });
+
+    // Remove avatar (local + cloud if possible)
+    async function removeAvatarEverywhere(){
+      try {
+        const currentUrl = localStorage.getItem('user_photo_url');
+        await removeAvatarLocal();
+        // Clear preview and navbar
+        document.getElementById('avatarPreview').innerHTML = '<span id="avatarLetter">B</span>';
+        const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.removeAttribute('src'); navImg.style.display='none'; }
+        // Try cloud cleanup if signed in and we have a URL
+        if (auth.currentUser && currentUrl) {
+          try { await storage.refFromURL(currentUrl).delete(); } catch(e) { /* ignore if not allowed */ }
+          try { await db.collection('profiles').doc(USER_DOC_ID).set({ photoURL: firebase.firestore.FieldValue.delete() }, { merge: true }); } catch(e){}
+        }
+        toast('Avatar removed');
+      } catch(e){ toast('Remove failed', e.message||''); }
+    }
+    const _removeBtnEl = document.getElementById('removeAvatar');
+    if (_removeBtnEl) _removeBtnEl.addEventListener('click', ()=>{ removeAvatarEverywhere(); });
+
+    // Sync local avatar to cloud later
+    async function syncLocalAvatarToCloud(){
+      if (!(auth.currentUser && auth.currentUser.uid)) { toast('Please sign in', 'Sign in to sync to cloud'); return; }
+      let local = await loadAvatarLocal();
+      if (!local) {
+        try { local = localStorage.getItem('user_photo_url'); } catch(e){}
+      }
+      if (!local) { toast('No local avatar to sync'); return; }
+      const blob = dataURLToBlob(local);
+      const path = `avatars/${USER_DOC_ID}/${Date.now()}_local.png`;
+      const ref = storage.ref().child(path);
+      try {
+        await ref.put(blob);
+        const url = await ref.getDownloadURL();
+        await db.collection('profiles').doc(USER_DOC_ID).set({ photoURL: url }, { merge: true });
+        localStorage.setItem('user_photo_url', url);
+        const navImg = document.getElementById('navAvatar'); if (navImg) { navImg.src = url; navImg.style.display='block'; }
+        setAvatarPreview(url);
+        toast('Avatar synced to cloud');
+      } catch(e){ toast('Sync failed', e.message||''); }
+    }
+    const _syncBtnEl = document.getElementById('syncAvatar');
+    if (_syncBtnEl) _syncBtnEl.addEventListener('click', ()=>{ syncLocalAvatarToCloud(); });
+  </script>
+</body>
+</html>

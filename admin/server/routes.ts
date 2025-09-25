@@ -118,6 +118,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // --- Notification Endpoints (Public demo) ---
+  // Note: In production, secure these endpoints (auth/rate limit/provider secrets)
+  app.post("/api/notify/email", async (req, res) => {
+    try {
+      const { to, subject, message } = req.body || {};
+      if (!to || typeof to !== "string") {
+        return res.status(400).json({ message: "Field 'to' (email) is required" });
+      }
+      // Simple email format check
+      const ok = /.+@.+\..+/.test(to);
+      if (!ok) return res.status(400).json({ message: "Invalid email address" });
+      const subj = typeof subject === "string" ? subject : "Notification Activated";
+      const msg = typeof message === "string" ? message : "Good Day Sir/Ma you successfully activated email service";
+
+      // Try to send with Nodemailer if SMTP env vars are available
+      const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env as Record<string, string | undefined>;
+      if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS) {
+        const nodemailer = await import('nodemailer');
+        const transporter = nodemailer.createTransport({
+          host: SMTP_HOST,
+          port: Number(SMTP_PORT),
+          secure: Number(SMTP_PORT) === 465, // true for 465, false for others
+          auth: { user: SMTP_USER, pass: SMTP_PASS },
+        });
+
+        await transporter.sendMail({
+          from: SMTP_FROM || SMTP_USER,
+          to,
+          subject: subj,
+          text: msg,
+        });
+
+        return res.json({ status: "ok", sent: true });
+      }
+
+      // Fallback: just log if SMTP not configured
+      console.log(`[notify/email:FALLBACK-LOG] to=${to} subject=${subj} message=${msg}`);
+      return res.json({ status: "ok", sent: false, note: "SMTP not configured; logged only" });
+    } catch (e: any) {
+      console.error("/api/notify/email error", e);
+      return res.status(500).json({ message: e?.message || "Failed to send email" });
+    }
+  });
+
+  app.post("/api/notify/sms", async (req, res) => {
+    try {
+      const { to, message } = req.body || {};
+      if (!to || typeof to !== "string") {
+        return res.status(400).json({ message: "Field 'to' (phone) is required" });
+      }
+      const msg = typeof message === "string" ? message : "Good Day Sir/Ma you successfully activated SMS service";
+
+      // Try Twilio if configured
+      const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER } = process.env as Record<string, string | undefined>;
+      if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_FROM_NUMBER) {
+        const twilioMod = await import('twilio');
+        const client = twilioMod.default(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+        const resp = await client.messages.create({ to, from: TWILIO_FROM_NUMBER, body: msg });
+        return res.json({ status: "ok", sid: resp.sid });
+      }
+
+      // Fallback: just log
+      console.log(`[notify/sms:FALLBACK-LOG] to=${to} message=${msg}`);
+      return res.json({ status: "ok", sent: false, note: "Twilio not configured; logged only" });
+    } catch (e: any) {
+      console.error("/api/notify/sms error", e);
+      return res.status(500).json({ message: e?.message || "Failed to send SMS" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

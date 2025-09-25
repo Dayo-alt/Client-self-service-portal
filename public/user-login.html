@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="Viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="form.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="main_container">
+    <h1>Login</h1>
+    <p id="error-message"></p>
+    <form id="form">
+      <div class="email-field">
+        <label for="email-input">...</label>
+        <input type="email" name="email" id="email-input" placeholder="Email">
+      </div>
+      <div class="password-field">
+        <label for="password-input">...</label>
+        <input type="password" name="password" id="password-input" placeholder="Password">
+      </div>
+      <button type="submit" class="submit">Login</button>
+    </form>
+    <p>New here <a href="user-signup.html">Create an Account</a></p>
+  </div>
+
+  <!-- Firebase SDKs: expose to window for form.js -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7eBbx6u7Tmi6Kr097A5yVL_NSRbsId6g",
+      authDomain: "client-self-service-portal.firebaseapp.com",
+      projectId: "client-self-service-portal",
+      storageBucket: "client-self-service-portal.firebasestorage.app",
+      messagingSenderId: "423657022971",
+      appId: "1:423657022971:web:d58cd5730591b0e121175e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    window.firebaseAuth = auth;
+    window.firebaseFns = { createUserWithEmailAndPassword, signInWithEmailAndPassword };
+  </script>
+
+  <!-- Your validation + auth logic (load ONCE) -->
+  <script src="form.js"></script>
+</body>
+</html>
+
+<script>
+  (function(){
+    const I18N = {
+      en: {
+        nav: { home: "Home", contact: "Contact Us" },
+        sidebar: { invoice: "Invoice", tracking: "Tracking", settings: "Settings" },
+        auth: { signOut: "Sign out" },
+        ticket: {
+          title: "Ticket Submission",
+          email: "Your Email",
+          subject: "Subject",
+          category: "Category",
+          description: "Description",
+          attach: "Attach file",
+          chooseFile: "Choose File",
+          remove: "Remove",
+          submit: "Submit Ticket",
+          demo: "Start Auto Demo",
+          conversation: "Conversation Thread",
+          noTickets: "No tickets yet — submit one on the left.",
+          history: "Ticket History",
+          send: "Send"
+        }
+      },
+      fr: {
+        nav: { home: "Accueil", contact: "Nous contacter" },
+        sidebar: { invoice: "Facture", tracking: "Suivi", settings: "Paramètres" },
+        auth: { signOut: "Se déconnecter" },
+        ticket: {
+          title: "Soumission de ticket",
+          email: "Votre e-mail",
+          subject: "Sujet",
+          category: "Catégorie",
+          description: "Description",
+          attach: "Joindre un fichier",
+          chooseFile: "Choisir un fichier",
+          remove: "Retirer",
+          submit: "Soumettre le ticket",
+          demo: "Démarrer la démo",
+          conversation: "Fil de conversation",
+          noTickets: "Pas encore de tickets — soumettez-en un à gauche.",
+          history: "Historique des tickets",
+          send: "Envoyer"
+        }
+      },
+      es: {
+        nav: { home: "Inicio", contact: "Contáctanos" },
+        sidebar: { invoice: "Factura", tracking: "Seguimiento", settings: "Configuración" },
+        auth: { signOut: "Cerrar sesión" },
+        ticket: {
+          title: "Envío de ticket",
+          email: "Tu correo",
+          subject: "Asunto",
+          category: "Categoría",
+          description: "Descripción",
+          attach: "Adjuntar archivo",
+          chooseFile: "Elegir archivo",
+          remove: "Quitar",
+          submit: "Enviar ticket",
+          demo: "Iniciar demo",
+          conversation: "Conversación",
+          noTickets: "Sin tickets — envía uno a la izquierda.",
+          history: "Historial de tickets",
+          send: "Enviar"
+        }
+      },
+      de: {
+        nav: { home: "Startseite", contact: "Kontakt" },
+        sidebar: { invoice: "Rechnung", tracking: "Verfolgung", settings: "Einstellungen" },
+        auth: { signOut: "Abmelden" },
+        ticket: {
+          title: "Ticket einreichen",
+          email: "Ihre E‑Mail",
+          subject: "Betreff",
+          category: "Kategorie",
+          description: "Beschreibung",
+          attach: "Datei anhängen",
+          chooseFile: "Datei wählen",
+          remove: "Entfernen",
+          submit: "Ticket senden",
+          demo: "Demo starten",
+          conversation: "Konversation",
+          noTickets: "Noch keine Tickets — links eins einreichen.",
+          history: "Ticketverlauf",
+          send: "Senden"
+        }
+      },
+      ar: {
+        nav: { home: "الرئيسية", contact: "اتصل بنا" },
+        sidebar: { invoice: "الفواتير", tracking: "التذاكر", settings: "الإعدادات" },
+        auth: { signOut: "تسجيل الخروج" },
+        ticket: {
+          title: "إرسال تذكرة",
+          email: "بريدك الإلكتروني",
+          subject: "الموضوع",
+          category: "الفئة",
+          description: "الوصف",
+          attach: "إرفاق ملف",
+          chooseFile: "اختر ملفًا",
+          remove: "إزالة",
+          submit: "إرسال التذكرة",
+          demo: "بدء العرض التوضيحي",
+          conversation: "سجل المحادثة",
+          noTickets: "لا توجد تذاكر — أرسل تذكرة من اليسار.",
+          history: "سجل التذاكر",
+          send: "إرسال"
+        }
+      },
+      ja: {
+        nav: { home: "ホーム", contact: "お問い合わせ" },
+        sidebar: { invoice: "請求書", tracking: "チケット", settings: "設定" },
+        auth: { signOut: "サインアウト" },
+        ticket: {
+          title: "チケット送信",
+          email: "メールアドレス",
+          subject: "件名",
+          category: "カテゴリ",
+          description: "詳細",
+          attach: "ファイル添付",
+          chooseFile: "ファイルを選択",
+          remove: "削除",
+          submit: "チケット送信",
+          demo: "デモ開始",
+          conversation: "会話",
+          noTickets: "チケットはまだありません — 左から送信してください。",
+          history: "チケット履歴",
+          send: "送信"
+        }
+      }
+    };
+  
+    function getI18n(path, lang) {
+      return path.split('.').reduce((o, k) => (o || {})[k], I18N[lang] || {});
+    }
+  
+    function applyI18n(lang) {
+      document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+      window.currentLang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const path = el.getAttribute('data-i18n');
+        const val = getI18n(path, lang);
+        if (typeof val === 'string') el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const path = el.getAttribute('data-i18n-placeholder');
+        const val = getI18n(path, lang);
+        if (typeof val === 'string') el.setAttribute('placeholder', val);
+      });
+    }
+  
+    document.addEventListener('DOMContentLoaded', function(){
+      const sel = document.getElementById('langSel');
+      let lang = localStorage.getItem('lang') || 'en';
+      if (sel) {
+        sel.value = lang;
+        sel.addEventListener('change', function(){
+          lang = sel.value;
+          localStorage.setItem('lang', lang);
+          applyI18n(lang);
+        });
+      }
+      applyI18n(lang);
+    });
+  })();
+  </script>
