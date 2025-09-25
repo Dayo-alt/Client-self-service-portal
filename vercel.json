@@ -1,5 +1,8 @@
 {
     "version": 2,
+    "rewrites": [
+    { "source": "/admin/(.*)", "destination": "/admin/index.html" }
+  ],
     "builds": [
       { "src": "public/**", "use": "@vercel/static" }
     ],
